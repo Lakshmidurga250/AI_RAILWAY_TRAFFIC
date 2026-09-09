@@ -9,3 +9,4 @@
 # Feature PR #09: Configure Rajdhani express priority slot assignments (Module: feat/timetabling-rajdhani-premium)
 # Feature PR #10: Integrate Shatabdi daytime express high-frequency slots (Module: feat/timetabling-shatabdi-intercity)
 # Feature PR #11: Schedule Duronto point-to-point nonstop paths (Module: feat/timetabling-duronto-nonstop)
+# Feature PR #12: Map Dedicated Freight Corridor 100km/h container paths (Module: feat/timetabling-dfc-freight-heavy-haul)
