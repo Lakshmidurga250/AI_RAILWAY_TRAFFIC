@@ -97,3 +97,4 @@
 >>>>>>> feat/station-chennai-central-approaches
 # Feature PR #77: Model Secunderabad junction 10-track bypass layout (feat/station-secunderabad-sc-hub)
 # Feature PR #78: Model Vijayawada Krishna river bridge bottlenecks (feat/station-vijayawada-bypass-junction)
+# Feature PR #79: Model Ahmedabad junction high-speed interface points (feat/station-ahmedabad-bullet-train-interface)
