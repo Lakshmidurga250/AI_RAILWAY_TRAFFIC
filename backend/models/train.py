@@ -152,3 +152,27 @@ class TrainPosition(Base):
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
     train = relationship("Train", back_populates="positions")
+
+class ScheduleVersion(Base):
+    __tablename__ = "schedule_versions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    version_code = Column(String(30), unique=True, index=True, nullable=False)
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class Schedule(Base):
+    __tablename__ = "schedules"
+
+    id = Column(String(50), primary_key=True, index=True)
+    train_id = Column(String(50), ForeignKey("trains.id", ondelete="CASCADE"), nullable=False, index=True)
+    version_id = Column(Integer, ForeignKey("schedule_versions.id"), nullable=True, index=True)
+    valid_from = Column(DateTime, nullable=False)
+    valid_to = Column(DateTime, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    version = relationship("ScheduleVersion")
+    train = relationship("Train")

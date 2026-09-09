@@ -6,6 +6,8 @@ from backend.repositories.token_repository import RefreshTokenRepository
 from backend.repositories.event_repository import AuditLogRepository, SystemEventRepository
 from backend.repositories.train_repository import TrainRepository
 from backend.repositories.network_repository import StationRepository, PlatformRepository, TrackRepository, RouteRepository
+from backend.repositories.disruption_repository import DisruptionRepository, DelayEventRepository
+from backend.repositories.schedule_repository import ScheduleRepository, ScheduleVersionRepository
 
 __all__ = [
     "BaseRepository",
@@ -19,4 +21,8 @@ __all__ = [
     "PlatformRepository",
     "TrackRepository",
     "RouteRepository",
+    "DisruptionRepository",
+    "DelayEventRepository",
+    "ScheduleRepository",
+    "ScheduleVersionRepository",
 ]
