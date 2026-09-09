@@ -68,3 +68,5 @@
 # Feature PR #59: Render station platform utilization color gradients (feat/frontend-station-congestion-heatmap)
 # Feature PR #74: Model Howrah 23-platform dual-system terminal complex (Module: feat/station-howrah-terminal-complex)
 # Feature PR #62: Seed default roles, permissions, and operator credentials (feat/database-rbac-security-seed)
+# Feature PR #63: Enforce 24-hour cryptographic JWT session validity (feat/security-token-jwt-expiration)
+# Feature PR #75: Model Mumbai CSMT suburban & long-distance throat (Module: feat/station-mumbai-csmt-heritage-yard)
