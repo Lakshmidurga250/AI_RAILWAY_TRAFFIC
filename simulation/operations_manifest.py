@@ -132,3 +132,4 @@
 # Feature PR #84: Monitor northern division winter overhead line icing diagnostics (feat/catenary-ice-formation-sensor-alerts)
 # Feature PR #85: Implement graph cycle detection and predictive deadlock prevention algorithms (feat/ai-deadlock-prevention-lookahead)
 # Feature PR #86: Tune active servo control for high-speed current collection stability (feat/telemetry-pantograph-bounce-suppression)
+# Feature PR #87: Render continuous cab signaling distance-to-target bars on dispatcher UI (feat/multi-aspect-cab-signaling-display)
