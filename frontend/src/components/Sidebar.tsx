@@ -18,18 +18,18 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard',    icon: '⚡', label: 'Dashboard',       group: 'Overview' },
-  { id: 'network',      icon: '🗺', label: 'Network Map',     group: 'Overview' },
-  { id: 'analytics',    icon: '📊', label: 'Analytics',       group: 'Overview' },
-  { id: 'fleet',        icon: '🚄', label: 'Fleet Manager',   group: 'Operations' },
-  { id: 'timetable',    icon: '📅', label: 'Timetable',       group: 'Operations' },
-  { id: 'simulation',   icon: '🔬', label: 'Simulation',      group: 'Operations' },
-  { id: 'conflicts',    icon: '⚠️', label: 'Conflicts',       group: 'Safety', badgeColor: 'var(--color-rose)' },
-  { id: 'interlocking', icon: '🔐', label: 'Interlocking',    group: 'Safety' },
-  { id: 'optimization', icon: '🧬', label: 'Optimization',    group: 'AI Modules' },
-  { id: 'ai',           icon: '🤖', label: 'AI Insights',     group: 'AI Modules' },
-  { id: 'twin',         icon: '🌐', label: 'Digital Twin',    group: 'AI Modules' },
-  { id: 'settings',     icon: '⚙️', label: 'Settings',        group: 'System' },
+  { id: 'dashboard', icon: '⚡', label: 'Dashboard', group: 'Overview' },
+  { id: 'network', icon: '🗺', label: 'Network Map', group: 'Overview' },
+  { id: 'analytics', icon: '📊', label: 'Analytics', group: 'Overview' },
+  { id: 'fleet', icon: '🚄', label: 'Fleet Manager', group: 'Operations' },
+  { id: 'timetable', icon: '📅', label: 'Timetable', group: 'Operations' },
+  { id: 'simulation', icon: '🔬', label: 'Simulation', group: 'Operations' },
+  { id: 'conflicts', icon: '⚠️', label: 'Conflicts', group: 'Safety', badgeColor: 'var(--color-rose)' },
+  { id: 'interlocking', icon: '🔐', label: 'Interlocking', group: 'Safety' },
+  { id: 'optimization', icon: '🧬', label: 'Optimization', group: 'AI Modules' },
+  { id: 'ai', icon: '🤖', label: 'AI Insights', group: 'AI Modules' },
+  { id: 'twin', icon: '🌐', label: 'Digital Twin', group: 'AI Modules' },
+  { id: 'settings', icon: '⚙️', label: 'Settings', group: 'System' },
 ];
 
 export function Sidebar({ activePage, onNavigate, collapsed, conflictCount }: SidebarProps) {
