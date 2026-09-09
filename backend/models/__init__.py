@@ -1,8 +1,8 @@
 """Database Models Export."""
 from backend.app.database import Base
 from backend.models.user import User, AuditLog, Role, Permission, UserRole, RolePermission, RefreshToken, SystemEvent
-from backend.models.network import Station, Platform, Track, Junction, Switch, Signal, Maintenance, WeatherCondition
-from backend.models.train import Train, ScheduleStop, TrainTelemetry, TrainEvent
+from backend.models.network import Station, Platform, Track, Junction, Switch, Signal, Maintenance, WeatherCondition, StationZone, Route, RouteSegment
+from backend.models.train import Train, ScheduleStop, TrainTelemetry, TrainEvent, TrainType, TrainCategory, TrainStatusHistory, TrainPosition
 from backend.models.simulation import SimulationRun, SimulationEvent, Scenario
 from backend.models.conflict import Conflict
 from backend.models.optimization import OptimizationRun
@@ -26,10 +26,17 @@ __all__ = [
     "Signal",
     "Maintenance",
     "WeatherCondition",
+    "StationZone",
+    "Route",
+    "RouteSegment",
     "Train",
     "ScheduleStop",
     "TrainTelemetry",
     "TrainEvent",
+    "TrainType",
+    "TrainCategory",
+    "TrainStatusHistory",
+    "TrainPosition",
     "SimulationRun",
     "SimulationEvent",
     "Scenario",

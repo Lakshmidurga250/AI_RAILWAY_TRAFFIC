@@ -22,30 +22,34 @@ Interactive Swagger documentation is available at `http://localhost:8000/docs` a
 
 ## 1. Authentication & RBAC (`/auth`)
 
-| Method | Path | Description | Roles Allowed |
+| Method | Path | Description | Permissions / Roles |
 |---|---|---|---|
-| `POST` | `/auth/login` | Authenticates username & password, returns JWT token | Public |
-| `POST` | `/auth/register` | Registers a new user account | Public / Admin |
-| `GET` | `/auth/me` | Fetches current user profile and role | Authenticated |
-
-### Example: Login
-```bash
-curl -X POST http://localhost:8000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "dispatcher_1", "password": "secure_password"}'
-```
+| `POST` | `/auth/login` | Authenticates user; returns Access Token, Refresh Token, and Permissions | Public |
+| `POST` | `/auth/refresh` | Rotates refresh token and issues new access token pair | Public / Client Session |
+| `POST` | `/auth/logout` | Revokes active refresh token | Public / Client Session |
+| `POST` | `/auth/register` | Registers a new user account with default role assignment | Public / Admin |
+| `GET` | `/auth/me` | Fetches current user profile and effective permissions list | Authenticated |
+| `GET` | `/auth/roles` | Lists system roles and assigned permission matrix | `admin`, `dispatcher` |
+| `GET` | `/auth/permissions` | Lists all discrete system permissions | Authenticated |
+| `POST` | `/auth/roles/assign` | Assigns a role to a user | `admin` |
+| `GET` | `/auth/events` | Queries structured security and audit events with Request ID correlation | `admin` |
 
 ---
 
 ## 2. Train Fleet Management (`/trains`)
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/trains` | Retrieves all registered trains, filterable by status |
-| `POST` | `/trains` | Registers a new train in the fleet |
-| `GET` | `/trains/{id}` | Fetches full train state, kinematics, and schedules |
-| `PUT` | `/trains/{id}` | Updates operational train parameters |
-| `GET` | `/trains/{id}/telemetry` | Time-series telemetry points (speed, lat, lng, delay, kWh) |
+| Method | Path | Description | Permissions / Roles |
+|---|---|---|---|
+| `GET` | `/trains` | Retrieves all active and timetabled fleet trains, filterable by status | Public / Viewer |
+| `POST` | `/trains` | Registers and timetables a new train in the database repository | `trains:write` |
+| `GET` | `/trains/{id}` | Fetches full train state, kinematics, telemetry, and planned stops | Public / Viewer |
+| `PUT` | `/trains/{id}` | Updates operational train parameters (priority, target speed, status) | `trains:write` |
+| `DELETE` | `/trains/{id}` | Cancels and removes a train from the fleet | `trains:delete` |
+| `POST` | `/trains/{id}/priority` | Commands priority level adjustments (1–10) | `trains:write` |
+| `POST` | `/trains/{id}/speed` | Commands target speed adjustment (0–300 km/h) | `trains:write` |
+| `POST` | `/trains/{id}/emergency-stop` | Executes immediate emergency brake, halts train, and logs transition | `trains:write` |
+| `GET` | `/trains/{id}/history` | Retrieves chronological status transition history (`train_status_history`) | `trains:read` |
+| `GET` | `/trains/{id}/positions` | Retrieves spatial position breadcrumbs (`train_positions`) for GIS maps | `trains:read` |
 
 ---
 

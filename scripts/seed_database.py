@@ -20,10 +20,13 @@ def seed():
         # 1. Seed RBAC Roles and Permissions
         from backend.repositories.role_repository import RoleRepository
         from backend.repositories.user_repository import UserRepository
+        from backend.repositories.train_repository import TrainRepository
         role_repo = RoleRepository(db)
         user_repo = UserRepository(db)
+        train_repo = TrainRepository(db)
         role_repo.seed_defaults()
-        print("[+] Seeded default RBAC roles (admin, dispatcher, operator, viewer) and permissions matrix.")
+        train_repo.seed_types_and_categories()
+        print("[+] Seeded default RBAC roles (admin, dispatcher, operator, viewer), permissions matrix, and train types.")
 
         # 2. Admin User
         admin = user_repo.get_by_username("admin")

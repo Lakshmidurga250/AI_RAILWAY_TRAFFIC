@@ -88,3 +88,26 @@ class TelemetryPoint(BaseModel):
     power_draw_kw: float = 0.0
     current_delay_min: float = 0.0
     passenger_count: int = 0
+
+class TrainStatusHistoryResponse(BaseModel):
+    id: int
+    train_id: str
+    previous_status: Optional[str] = None
+    new_status: str
+    reason: Optional[str] = None
+    delay_at_time_min: float
+    changed_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class TrainPositionResponse(BaseModel):
+    id: int
+    train_id: str
+    track_id: Optional[str] = None
+    distance_along_track_km: float
+    latitude: float
+    longitude: float
+    speed_kmh: float
+    timestamp: datetime
+
+    model_config = ConfigDict(from_attributes=True)

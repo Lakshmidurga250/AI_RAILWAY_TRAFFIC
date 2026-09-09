@@ -109,3 +109,37 @@ class WeatherCondition(Base):
     visibility_m = Column(Float, default=10000.0)
     friction_coefficient = Column(Float, default=1.0)  # 1.0 = optimal rail adhesion
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+
+class StationZone(Base):
+    __tablename__ = "station_zones"
+
+    code = Column(String(50), primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    max_speed_kmh = Column(Float, default=160.0)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class Route(Base):
+    __tablename__ = "routes"
+
+    id = Column(String(50), primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    origin_station_id = Column(String(50), ForeignKey("stations.id"), nullable=False)
+    destination_station_id = Column(String(50), ForeignKey("stations.id"), nullable=False)
+    total_distance_km = Column(Float, default=0.0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    segments = relationship("RouteSegment", back_populates="route", cascade="all, delete-orphan")
+
+class RouteSegment(Base):
+    __tablename__ = "route_segments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    route_id = Column(String(50), ForeignKey("routes.id", ondelete="CASCADE"), nullable=False, index=True)
+    sequence_order = Column(Integer, nullable=False)
+    track_id = Column(String(50), ForeignKey("tracks.id"), nullable=False)
+    from_node = Column(String(50), nullable=False)
+    to_node = Column(String(50), nullable=False)
+
+    route = relationship("Route", back_populates="segments")

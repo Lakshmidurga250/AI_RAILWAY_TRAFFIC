@@ -55,6 +55,8 @@ class Train(Base):
     schedules = relationship("ScheduleStop", back_populates="train", cascade="all, delete-orphan")
     telemetry_records = relationship("TrainTelemetry", back_populates="train", cascade="all, delete-orphan")
     events = relationship("TrainEvent", back_populates="train", cascade="all, delete-orphan")
+    status_history = relationship("TrainStatusHistory", back_populates="train", cascade="all, delete-orphan")
+    positions = relationship("TrainPosition", back_populates="train", cascade="all, delete-orphan")
 
 class ScheduleStop(Base):
     __tablename__ = "schedule_stops"
@@ -103,3 +105,50 @@ class TrainEvent(Base):
     details = Column(JSON, nullable=True)
     
     train = relationship("Train", back_populates="events")
+
+class TrainType(Base):
+    __tablename__ = "train_types"
+
+    code = Column(String(30), primary_key=True, index=True)  # HIGH_SPEED, INTERCITY, REGIONAL, FREIGHT, COMMUTER
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    default_max_speed_kmh = Column(Float, default=160.0)
+    default_acceleration_ms2 = Column(Float, default=0.8)
+    default_braking_ms2 = Column(Float, default=1.0)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class TrainCategory(Base):
+    __tablename__ = "train_categories"
+
+    code = Column(String(30), primary_key=True, index=True)  # PASSENGER_EXPRESS, FREIGHT_BULK, etc.
+    name = Column(String(100), nullable=False)
+    default_priority = Column(Integer, default=5)
+    is_passenger = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class TrainStatusHistory(Base):
+    __tablename__ = "train_status_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    train_id = Column(String(50), ForeignKey("trains.id", ondelete="CASCADE"), nullable=False, index=True)
+    previous_status = Column(String(30), nullable=True)
+    new_status = Column(String(30), nullable=False, index=True)
+    reason = Column(String(255), nullable=True)
+    delay_at_time_min = Column(Float, default=0.0)
+    changed_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+
+    train = relationship("Train", back_populates="status_history")
+
+class TrainPosition(Base):
+    __tablename__ = "train_positions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    train_id = Column(String(50), ForeignKey("trains.id", ondelete="CASCADE"), nullable=False, index=True)
+    track_id = Column(String(50), nullable=True, index=True)
+    distance_along_track_km = Column(Float, default=0.0)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    speed_kmh = Column(Float, default=0.0)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+
+    train = relationship("Train", back_populates="positions")
