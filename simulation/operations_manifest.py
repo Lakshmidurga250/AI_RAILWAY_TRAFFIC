@@ -36,3 +36,4 @@
 # Feature PR #36: Configure emergency fishplate clamping protocol (Module: feat/contingency-rail-fracture-emergency)
 # Feature PR #37: Implement audio-frequency track circuit bypass rules (Module: feat/contingency-track-circuit-chatter)
 # Feature PR #38: Add train parting and tail lamp detection protocol (Module: feat/contingency-loco-flashing-tail-lamp)
+# Feature PR #39: Configure waterlogging speed restriction SOP (Module: feat/contingency-heavy-rainfall-submergence)
