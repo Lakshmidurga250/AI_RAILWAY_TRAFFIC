@@ -9,10 +9,14 @@ class DigitalTwin:
     
     def __init__(self, engine: SimulationEngine = sim_engine):
         self.engine = engine
+        self._cached_snapshot: Dict[str, Any] = {}
 
     def get_live_snapshot(self) -> Dict[str, Any]:
-        """Compile complete digital twin real-time state."""
-        with self.engine.step_lock:
+        """Compile complete digital twin real-time state safely without event loop deadlocks."""
+        acquired = self.engine.step_lock.acquire(blocking=True, timeout=0.05)
+        if not acquired:
+            return self._cached_snapshot or {"timestamp": datetime.now(timezone.utc).isoformat(), "trains": [], "signals": [], "conflicts": [], "simulation": self.engine.get_status_summary()}
+        try:
             # 1. Trains State
             trains_data = []
             for t in self.engine.trains.values():
@@ -108,7 +112,7 @@ class DigitalTwin:
             # 6. Simulation Summary
             summary = self.engine.get_status_summary()
 
-            return {
+            result = {
                 "timestamp": self.engine.sim_time.isoformat(),
                 "simulation": summary,
                 "trains": trains_data,
@@ -118,5 +122,9 @@ class DigitalTwin:
                 "conflicts": conflicts_data,
                 "recent_events": [e.model_dump(mode="json") for e in event_bus.get_history(limit=25)]
             }
+            self._cached_snapshot = result
+            return result
+        finally:
+            self.engine.step_lock.release()
 
 digital_twin = DigitalTwin(sim_engine)

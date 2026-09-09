@@ -29,7 +29,9 @@ wheels/
 
 # Environment
 .env
-!.env.example
+.env.*
+*.env
+!example.env
 
 # Node / Frontend
 node_modules/

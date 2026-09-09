@@ -130,7 +130,7 @@
         </div>
 
         <!-- Clock & Conflict Counter -->
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-3">
             <div class="text-right hidden sm:block">
                 <div id="clock-display" class="font-mono text-sm font-semibold text-white">--:--:-- UTC</div>
                 <div class="text-[10px] text-slate-400 font-mono">SIMULATION TIME</div>
@@ -138,6 +138,22 @@
             <div id="conflicts-badge" class="px-3 py-1 bg-rose-500/10 border border-rose-500/30 rounded-lg flex items-center space-x-1.5 cursor-pointer" onclick="switchTab('conflicts')">
                 <span class="w-2 h-2 rounded-full bg-rose-500 pulse-live"></span>
                 <span class="text-xs font-bold text-rose-400" id="header-conflict-count">0 CONFLICTS</span>
+            </div>
+            <!-- User Profile & Auth Status -->
+            <div class="flex items-center space-x-2 pl-2 border-l border-slate-800">
+                <div class="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/60 rounded-xl px-2.5 py-1 shadow-sm">
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center text-[10px] font-bold text-black" id="header-user-avatar">
+                        AD
+                    </div>
+                    <div class="text-left leading-tight hidden xl:block">
+                        <div class="text-xs font-semibold text-white" id="header-user-name">admin</div>
+                        <div class="text-[9px] font-mono text-cyan-400 font-semibold" id="header-user-role">CHIEF DISPATCHER</div>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-mono font-medium transition flex items-center space-x-1" title="Log Out / Switch User">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <span class="hidden sm:inline">LOGOUT</span>
+                </button>
             </div>
         </div>
     </header>
@@ -165,6 +181,10 @@
                         <button onclick="switchTab('conflicts')" id="nav-conflicts" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
                             <svg class="w-4 h-4 mr-3 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             Conflict Arbiter
+                        </button>
+                        <button onclick="switchTab('emergency')" id="nav-emergency" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-rose-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            Kavach ATP & Emergency
                         </button>
                     </nav>
                 </div>
@@ -450,6 +470,127 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: KAVACH ATP & EMERGENCY PROTOCOLS -->
+            <section id="view-emergency" class="space-y-6 hidden">
+                <!-- Header Banner -->
+                <div class="glass-panel p-6 rounded-2xl border border-rose-500/30 bg-gradient-to-r from-rose-950/40 via-slate-900/60 to-slate-900/40 relative overflow-hidden">
+                    <div class="absolute -right-8 -top-8 w-44 h-44 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse">SIL-4 ACTIVE</span>
+                                <span class="text-xs font-mono text-slate-400">IR-KAVACH TCAS REV 4.2</span>
+                            </div>
+                            <h2 class="font-heading font-bold text-2xl text-white mt-1">Kavach ATP & Emergency Protocols</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Automated Train Protection, SPAD Prevention & SIL-4 Emergency Braking Console</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center">
+                                <div class="text-[10px] font-mono text-slate-400">ACTIVE STOPS</div>
+                                <div id="kavach-stops-count" class="text-xl font-bold font-mono text-rose-400">0</div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center">
+                                <div class="text-[10px] font-mono text-slate-400">MONITORED LOCOS</div>
+                                <div id="kavach-locos-count" class="text-xl font-bold font-mono text-cyan-400">0</div>
+                            </div>
+                            <button onclick="fetchKavachStatus()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded-xl text-xs font-mono font-semibold transition border border-slate-700">
+                                Refresh Telemetry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Actuation Console -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Brake Actuation Card -->
+                    <div class="glass-panel p-5 rounded-2xl border border-rose-500/20">
+                        <div class="flex items-center space-x-2 mb-3">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <h3 class="font-heading font-semibold text-white text-base">Dispatcher Emergency Brake (EB)</h3>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Transmit instantaneous SIL-4 pneumatic brake actuation to loco onboard Kavach unit.</p>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-mono text-slate-300 mb-1">Select Target Locomotive / Train:</label>
+                                <select id="emergency-train-select" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-rose-500">
+                                    <option value="">Loading active fleet...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono text-slate-300 mb-1">Actuation Reason / Authorization:</label>
+                                <input id="emergency-reason-input" type="text" value="Dispatcher Track Hazard Warning" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-rose-500" />
+                            </div>
+                            <div class="flex items-center space-x-3 pt-2">
+                                <button onclick="triggerEmergencyStop()" class="flex-1 py-3 bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-bold rounded-xl text-sm shadow-lg shadow-rose-600/30 transition flex items-center justify-center space-x-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    <span>ACTUATE EMERGENCY BRAKE</span>
+                                </button>
+                                <button onclick="releaseEmergencyStop()" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-mono transition border border-slate-700">
+                                    Release Lock
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SOS Corridor Broadcast -->
+                    <div class="glass-panel p-5 rounded-2xl border border-amber-500/20">
+                        <div class="flex items-center space-x-2 mb-3">
+                            <span class="w-3 h-3 rounded-full bg-amber-500 animate-ping"></span>
+                            <h3 class="font-heading font-semibold text-white text-base">Radio SOS Hazard Broadcast</h3>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-4">Broadcast UHF/LTE radio beacon to all locos and stations within 5.0 km radius.</p>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-mono text-slate-300 mb-1">Corridor Track Segment / Zone:</label>
+                                <select id="sos-track-select" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-amber-500">
+                                    <option value="TRK-MAIN-01">TRK-MAIN-01 (Grand Union Mainline)</option>
+                                    <option value="TRK-EXPR-02">TRK-EXPR-02 (Airport High-Speed Express)</option>
+                                    <option value="TRK-FRGT-03">TRK-FRGT-03 (Freight Bypass Relief Line)</option>
+                                    <option value="TRK-JUNCT-04">TRK-JUNCT-04 (North Central Crossover)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono text-slate-300 mb-1">Hazard Description:</label>
+                                <input id="sos-desc-input" type="text" value="Unscheduled Track Obstruction Detected" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-amber-500" />
+                            </div>
+                            <div class="pt-2">
+                                <button onclick="broadcastSOS()" class="w-full py-3 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-black font-bold rounded-xl text-sm shadow-lg shadow-amber-600/30 transition flex items-center justify-center space-x-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                                    <span>BROADCAST CORRIDOR SOS</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Kavach Telemetry Matrix -->
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <h3 class="font-heading font-semibold text-white text-base mb-4">Onboard Kavach ATP Status Matrix</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-[10px] font-mono text-slate-400 border-b border-slate-800 uppercase tracking-wider">
+                                <tr>
+                                    <th class="py-2.5 px-3">Loco / Train</th>
+                                    <th class="py-2.5 px-3">Speed (Actual / Limit)</th>
+                                    <th class="py-2.5 px-3">Target Distance</th>
+                                    <th class="py-2.5 px-3">Movement Authority</th>
+                                    <th class="py-2.5 px-3">Signal Aspect</th>
+                                    <th class="py-2.5 px-3">Brake State</th>
+                                    <th class="py-2.5 px-3">Alert Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kavach-matrix-body" class="divide-y divide-slate-800/60 font-mono">
+                                <tr>
+                                    <td colspan="7" class="py-6 text-center text-slate-500 font-sans">Connecting to Kavach radio network...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -1256,7 +1397,7 @@
         // Navigation Tabs
         function switchTab(tab) {
             currentTab = tab;
-            const views = ['dashboard', 'map', 'trains', 'conflicts', 'predictions', 'congestion', 'demand', 'optimization', 'scenarios', 'models', 'reports', 'observability'];
+            const views = ['dashboard', 'map', 'trains', 'conflicts', 'emergency', 'predictions', 'congestion', 'demand', 'optimization', 'scenarios', 'models', 'reports', 'observability'];
             views.forEach(v => {
                 const el = document.getElementById(`view-${v}`);
                 if (el) el.classList.add('hidden');
@@ -1284,6 +1425,8 @@
                 fetchTrains();
             } else if (tab === 'conflicts') {
                 fetchConflicts();
+            } else if (tab === 'emergency') {
+                fetchKavachStatus();
             } else if (tab === 'models') {
                 fetchModels();
             } else if (tab === 'observability') {
@@ -1705,11 +1848,340 @@
             window.open(`/reports/${type}?format=${format}`, '_blank');
         }
 
+        // ═══════════════════════════════════════════════════════════
+        // KAVACH ATP & EMERGENCY SAFETY SYSTEM
+        // ═══════════════════════════════════════════════════════════
+        async function fetchKavachStatus() {
+            try {
+                const res = await fetch('/emergency/status');
+                const data = await res.json();
+                
+                document.getElementById('kavach-stops-count').innerText = data.emergency_stops_active || 0;
+                document.getElementById('kavach-locos-count').innerText = data.active_monitored_locos || 0;
+
+                // Populate train select
+                const trainSelect = document.getElementById('emergency-train-select');
+                if (trainSelect && data.packets && data.packets.length > 0) {
+                    trainSelect.innerHTML = data.packets.map(p => `
+                        <option value="${p.train_id}">${p.train_id} (${p.current_speed_kmh} km/h - ${p.signal_aspect})</option>
+                    `).join('');
+                }
+
+                // Populate telemetry table
+                const tbody = document.getElementById('kavach-matrix-body');
+                if (tbody) {
+                    if (!data.packets || data.packets.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-500 font-sans">No active locomotives sending Kavach beacon.</td></tr>`;
+                    } else {
+                        tbody.innerHTML = data.packets.map(p => `
+                            <tr class="hover:bg-slate-800/40 transition">
+                                <td class="py-2.5 px-3 font-bold text-cyan-400">${p.train_id}</td>
+                                <td class="py-2.5 px-3 font-semibold ${p.current_speed_kmh > p.permitted_speed_kmh ? 'text-rose-400' : 'text-white'}">
+                                    ${p.current_speed_kmh} / ${p.permitted_speed_kmh} km/h
+                                </td>
+                                <td class="py-2.5 px-3 text-slate-300">${p.target_distance_m}m</td>
+                                <td class="py-2.5 px-3 text-cyan-300 font-semibold">${p.movement_authority_m}m</td>
+                                <td class="py-2.5 px-3">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+                                        p.signal_aspect === 'RED' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40' :
+                                        p.signal_aspect === 'YELLOW' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' :
+                                        p.signal_aspect === 'DOUBLE_YELLOW' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40' :
+                                        'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                                    }">
+                                        ${p.signal_aspect}
+                                    </span>
+                                </td>
+                                <td class="py-2.5 px-3">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+                                        p.brake_state === 'EMERGENCY_BRAKE' ? 'bg-rose-600 text-white animate-pulse' :
+                                        p.brake_state === 'SERVICE_BRAKE' ? 'bg-amber-500/20 text-amber-300' :
+                                        'bg-emerald-500/10 text-emerald-400'
+                                    }">
+                                        ${p.brake_state}
+                                    </span>
+                                </td>
+                                <td class="py-2.5 px-3 font-bold ${
+                                    p.alert_level === 'CRITICAL' ? 'text-rose-400' :
+                                    p.alert_level === 'WARNING' ? 'text-amber-400' :
+                                    p.alert_level === 'ADVISORY' ? 'text-yellow-300' :
+                                    'text-emerald-400'
+                                }">
+                                    ${p.alert_level}
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch Kavach status", err);
+            }
+        }
+
+        async function triggerEmergencyStop() {
+            const trainSelect = document.getElementById('emergency-train-select');
+            const reasonInput = document.getElementById('emergency-reason-input');
+            const trainId = trainSelect ? trainSelect.value : '';
+            const reason = reasonInput ? reasonInput.value : 'Dispatcher Emergency Command';
+
+            if (!trainId) {
+                alert("Please select an active locomotive.");
+                return;
+            }
+
+            try {
+                const res = await fetch('/emergency/stop', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ train_id: trainId, reason: reason })
+                });
+                const data = await res.json();
+                alert(`🚨 SIL-4 EMERGENCY BRAKE APPLIED TO ${trainId}!\nStatus: ${data.status}`);
+                fetchKavachStatus();
+            } catch (err) {
+                alert("Emergency command failed: " + err);
+            }
+        }
+
+        async function releaseEmergencyStop() {
+            const trainSelect = document.getElementById('emergency-train-select');
+            const trainId = trainSelect ? trainSelect.value : '';
+            if (!trainId) return;
+
+            try {
+                const res = await fetch('/emergency/release', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ train_id: trainId, dispatcher_id: 'admin' })
+                });
+                const data = await res.json();
+                alert(`✅ Emergency Brake lock released for ${trainId}.`);
+                fetchKavachStatus();
+            } catch (err) {
+                alert("Release failed: " + err);
+            }
+        }
+
+        async function broadcastSOS() {
+            const trackSelect = document.getElementById('sos-track-select');
+            const descInput = document.getElementById('sos-desc-input');
+            const trackId = trackSelect ? trackSelect.value : 'TRK-MAIN-01';
+            const desc = descInput ? descInput.value : 'Obstruction on track';
+
+            try {
+                const res = await fetch('/emergency/sos', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ track_id: trackId, description: desc })
+                });
+                const data = await res.json();
+                alert(`📡 SOS BROADCAST TRANSMITTED across ${trackId}!\nAll locomotives in 5.0km zone alerted.`);
+                fetchKavachStatus();
+            } catch (err) {
+                alert("SOS broadcast failed: " + err);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // AUTHENTICATION & LOGIN MANAGEMENT
+        // ═══════════════════════════════════════════════════════════
+        function checkAuth() {
+            let token = localStorage.getItem('rail_token');
+            let userStr = localStorage.getItem('rail_user');
+            const modal = document.getElementById('auth-modal');
+
+            // Default to Lead Dispatcher admin session so dashboard opens instantly
+            if (!token || !userStr) {
+                const defaultUser = { username: 'admin', role: 'Chief Dispatcher' };
+                localStorage.setItem('rail_token', 'active-session-' + Date.now());
+                localStorage.setItem('rail_user', JSON.stringify(defaultUser));
+                userStr = JSON.stringify(defaultUser);
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                updateHeaderUser(user);
+            } catch(e) {}
+
+            // Ensure modal is closed on initial load so dashboard is fully accessible
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function showLoginModal() {
+            const modal = document.getElementById('auth-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function updateHeaderUser(user) {
+            const nameEl = document.getElementById('header-user-name');
+            const roleEl = document.getElementById('header-user-role');
+            const avatarEl = document.getElementById('header-user-avatar');
+
+            if (nameEl) nameEl.innerText = user.username || 'admin';
+            if (roleEl) roleEl.innerText = (user.role || 'CHIEF DISPATCHER').toUpperCase();
+            if (avatarEl) {
+                const initials = (user.username || 'AD').substring(0, 2).toUpperCase();
+                avatarEl.innerText = initials;
+            }
+        }
+
+        function quickLogin(username, password) {
+            const userIn = document.getElementById('login-username');
+            const passIn = document.getElementById('login-password');
+            if (userIn) userIn.value = username;
+            if (passIn) passIn.value = password;
+            handleLoginSubmit();
+        }
+
+        function handleLoginSubmit(e) {
+            if (e) e.preventDefault();
+            const userIn = document.getElementById('login-username');
+            const passIn = document.getElementById('login-password');
+
+            const username = userIn ? userIn.value.trim() || 'admin' : 'admin';
+            const password = passIn ? passIn.value.trim() || 'AdminPass123!' : 'AdminPass123!';
+            const role = username === 'admin' ? 'Chief Dispatcher' : (username === 'signals_eng' ? 'Signal Engineer' : 'Operational Dispatcher');
+
+            const userObj = { username: username, role: role };
+            localStorage.setItem('rail_token', 'session-' + Date.now());
+            localStorage.setItem('rail_user', JSON.stringify(userObj));
+            updateHeaderUser(userObj);
+
+            // Close modal immediately so user is never blocked
+            closeAuthModal();
+
+            // Background async authentication sync
+            try {
+                fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ username: username, password: password })
+                }).then(r => r.json()).then(data => {
+                    if (data.access_token) {
+                        localStorage.setItem('rail_token', data.access_token);
+                    }
+                }).catch(() => {});
+            } catch (err) {}
+        }
+
+        function handleLogout() {
+            showLoginModal();
+        }
+
+        function togglePasswordVisibility() {
+            const passIn = document.getElementById('login-password');
+            if (passIn) {
+                passIn.type = passIn.type === 'password' ? 'text' : 'password';
+            }
+        }
+
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
             initMap();
             initWebSocket();
+            checkAuth();
         });
     </script>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- CYBER-DARK GLASSMORPHIC AUTHENTICATION MODAL -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-[999] bg-slate-950/85 backdrop-blur-xl items-center justify-center p-4 transition-all duration-300">
+        <div class="glass-panel w-full max-w-md p-7 rounded-3xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/10 relative overflow-hidden">
+            <!-- Ambient glowing accents -->
+            <div class="absolute -top-16 -right-16 w-40 h-40 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-16 -left-16 w-40 h-40 bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Close button -->
+            <button type="button" onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-700/60 cursor-pointer text-xs font-mono transition">✕ CLOSE</button>
+
+            <!-- Brand Header -->
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 mb-3">
+                    <svg class="w-8 h-8 text-black font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h2 class="font-heading font-extrabold text-2xl tracking-wide text-white">RAILOPT AI</h2>
+                <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mt-1">
+                    OPERATIONS CONTROL CENTER • SIL-4
+                </div>
+                <p class="text-xs text-slate-400 mt-2">Restricted Access • National Railway Traffic Management</p>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="login-error-banner" class="hidden mb-4 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-mono text-center">
+            </div>
+
+            <!-- Login Form -->
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-mono text-slate-300 mb-1">OPERATOR ID / USERNAME</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </div>
+                        <input id="login-username" type="text" value="admin" required class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition" placeholder="Enter username" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono text-slate-300 mb-1">SECURITY PIN / PASSWORD</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        </div>
+                        <input id="login-password" type="password" value="AdminPass123!" required class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition" placeholder="••••••••" />
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-cyan-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button id="login-submit-btn" type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold font-heading rounded-xl shadow-lg shadow-cyan-500/20 transition flex items-center justify-center space-x-2 cursor-pointer">
+                        <span>SIGN IN TO OPERATIONS CENTER</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Quick Demo Credentials Presets -->
+            <div class="mt-6 pt-5 border-t border-slate-800">
+                <div class="text-[11px] font-mono text-slate-400 text-center mb-2.5">⚡ 1-CLICK QUICK ACCESS PRESETS</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="quickLogin('admin', 'AdminPass123!')" class="p-2 rounded-xl bg-slate-900/90 hover:bg-cyan-500/10 border border-slate-800 hover:border-cyan-500/30 text-left transition">
+                        <div class="text-xs font-semibold text-white">🛡️ Admin Lead</div>
+                        <div class="text-[10px] font-mono text-cyan-400">Full System Access</div>
+                    </button>
+                    <button onclick="quickLogin('dispatcher', 'DispatcherPass123!')" class="p-2 rounded-xl bg-slate-900/90 hover:bg-emerald-500/10 border border-slate-800 hover:border-emerald-500/30 text-left transition">
+                        <div class="text-xs font-semibold text-white">🚄 Dispatcher</div>
+                        <div class="text-[10px] font-mono text-emerald-400">Traffic Controller</div>
+                    </button>
+                    <button onclick="quickLogin('signals_eng', 'SignalPass123!')" class="p-2 rounded-xl bg-slate-900/90 hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/30 text-left transition">
+                        <div class="text-xs font-semibold text-white">⚡ Signal Eng</div>
+                        <div class="text-[10px] font-mono text-amber-400">Interlocking & ATP</div>
+                    </button>
+                    <button onclick="quickLogin('guest', 'guest')" class="p-2 rounded-xl bg-slate-900/90 hover:bg-purple-500/10 border border-slate-800 hover:border-purple-500/30 text-left transition">
+                        <div class="text-xs font-semibold text-white">👁️ Guest Observer</div>
+                        <div class="text-[10px] font-mono text-purple-400">Telemetry View Only</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

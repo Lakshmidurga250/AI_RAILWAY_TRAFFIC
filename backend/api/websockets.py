@@ -40,21 +40,12 @@ async def websocket_live_stream(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         # Send initial snapshot immediately
-        initial_snap = digital_twin.get_live_snapshot()
+        initial_snap = await asyncio.to_thread(digital_twin.get_live_snapshot)
         await websocket.send_text(json.dumps({"type": "INIT_SNAPSHOT", "data": initial_snap}))
 
         while True:
-            # Poll for incoming control messages or send tick
-            try:
-                data = await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
-                # Client command handling (e.g. ping)
-                if data == "PING":
-                    await websocket.send_text(json.dumps({"type": "PONG"}))
-            except asyncio.TimeoutError:
-                pass
-
-            # Push live state update
-            snap = digital_twin.get_live_snapshot()
+            await asyncio.sleep(1.0)
+            snap = await asyncio.to_thread(digital_twin.get_live_snapshot)
             await websocket.send_text(json.dumps({
                 "type": "TICK",
                 "timestamp": snap["timestamp"],
@@ -63,7 +54,7 @@ async def websocket_live_stream(websocket: WebSocket):
                 "signals": snap["signals"],
                 "conflicts": snap["conflicts"]
             }))
-    except WebSocketDisconnect:
+    except (WebSocketDisconnect, ConnectionResetError, RuntimeError):
         manager.disconnect(websocket)
     except Exception:
         manager.disconnect(websocket)
