@@ -34,3 +34,4 @@
 # Feature PR #34: Add OHE substation power tripping contingency SOP (Module: feat/contingency-ohe-tripping-playbook)
 # Feature PR #35: Implement point motor failure manual cranking SOP (Module: feat/contingency-point-detection-failure)
 # Feature PR #36: Configure emergency fishplate clamping protocol (Module: feat/contingency-rail-fracture-emergency)
+# Feature PR #37: Implement audio-frequency track circuit bypass rules (Module: feat/contingency-track-circuit-chatter)
