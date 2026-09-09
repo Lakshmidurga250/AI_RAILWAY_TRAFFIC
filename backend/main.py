@@ -30,7 +30,8 @@ from backend.api import (
     analytics_router,
     reports_router,
     models_router,
-    websockets_router
+    websockets_router,
+    physics_router
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -176,6 +177,7 @@ api_routers = [
     analytics_router,
     reports_router,
     models_router,
+    physics_router,
 ]
 
 for r in api_routers:
