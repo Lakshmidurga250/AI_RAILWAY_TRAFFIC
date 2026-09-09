@@ -124,3 +124,4 @@
 # Feature PR #89: Deploy 2-out-of-3 hardware fail-safe logic comparator (feat/safety-sil4-voting-architecture)
 # Feature PR #90: Simulate 1-in-100 climbing and descending braking distances (feat/network-gradient-resistance-profile)
 # Feature PR #91: Implement Doppler radar wheel slip correction for ATP (feat/kavach-odometer-wheel-slip-compensation)
+# Feature PR #79: Validate SIL-4 Kavach UHF radio packets with CRC-32 integrity (feat/kavach-wireless-packet-validation)
