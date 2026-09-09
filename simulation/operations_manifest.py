@@ -35,3 +35,4 @@
 # Feature PR #35: Implement point motor failure manual cranking SOP (Module: feat/contingency-point-detection-failure)
 # Feature PR #36: Configure emergency fishplate clamping protocol (Module: feat/contingency-rail-fracture-emergency)
 # Feature PR #37: Implement audio-frequency track circuit bypass rules (Module: feat/contingency-track-circuit-chatter)
+# Feature PR #38: Add train parting and tail lamp detection protocol (Module: feat/contingency-loco-flashing-tail-lamp)
