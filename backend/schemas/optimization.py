@@ -93,3 +93,44 @@ class OptimizationRunResponse(BaseModel):
     explanation: Optional[str] = None
     created_at: datetime
 
+class RLTrainRequest(BaseModel):
+    episodes: int = 10
+    max_steps_per_episode: int = 25
+    algorithm: str = "DQN"  # DQN, PPO
+    use_action_masking: bool = True
+
+class RLTrainResponse(BaseModel):
+    run_id: str
+    algorithm: str
+    episodes_trained: int
+    mean_episode_reward: float
+    shield_interventions_count: int
+    improvement_percentage: float
+    execution_time_ms: float
+
+class RLDispatchRequest(BaseModel):
+    train_id: str
+    algorithm: str = "DQN"  # DQN, PPO, RULE_BASED
+    use_safety_shield: bool = True
+
+class RLDispatchResponse(BaseModel):
+    train_id: str
+    algorithm: str
+    proposed_action: str
+    executed_action: str
+    shield_intervened: bool
+    violations: List[str] = []
+    reason: str
+    action_mask: List[bool] = []
+
+class RLTrainingRunResponse(BaseModel):
+    id: str
+    algorithm: str
+    episodes_trained: int
+    mean_episode_reward: float
+    shield_interventions_count: int
+    baseline_heuristic_reward: float
+    improvement_percentage: float
+    created_at: datetime
+
+
