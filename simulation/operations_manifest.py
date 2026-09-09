@@ -62,3 +62,4 @@
 >>>>>>> feat/api-metrics-prometheus-observability
 # Feature PR #52: Train multi-factor track conflict prediction network (feat/ai-conflict-prediction-classifier)
 # Feature PR #64: Remove sensitive .env tracking and enforce example.env (Module: feat/security-env-sanitize-secrets)
+# Feature PR #54: Train PPO policy for automated loop line dispatching (feat/ai-reinforcement-learning-dispatcher)
