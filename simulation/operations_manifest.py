@@ -24,3 +24,4 @@
 # Feature PR #24: Implement fog signal detonator and visibility distance rules (Module: feat/gsr-fog-signaling-safety)
 # Feature PR #25: Enforce shunting speed limits and guard escort clauses (Module: feat/gsr-shunting-safety-invariants)
 # Feature PR #26: Add interlocked level crossing gate safety verifications (Module: feat/gsr-level-crossing-interlocking)
+# Feature PR #27: Add WAP-7 6000HP locomotive traction motor telemetry (Module: feat/telemetry-wap7-traction-logs)
