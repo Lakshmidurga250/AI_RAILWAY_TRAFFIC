@@ -51,3 +51,4 @@
 # Feature PR #51: Export dispatch latency and conflict rate metrics (Module: feat/api-metrics-prometheus-observability)
 # Feature PR #52: Train multi-factor track conflict prediction network (Module: feat/ai-conflict-prediction-classifier)
 # Feature PR #43: Compute continuous distance-to-collision curves (feat/kavach-head-on-collision-prevention)
+# Feature PR #47: Offload live websocket snapshot serialization to threads (feat/websocket-telemetry-thread-offload)
