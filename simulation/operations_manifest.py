@@ -105,3 +105,4 @@
 >>>>>>> feat/station-ahmedabad-bullet-train-interface
 # Feature PR #80: Model Kanpur Central Ganges bridge 4-track transition (feat/station-kanpur-central-bottle-neck)
 # Feature PR #81: Model Prayagraj junction sangam multi-directional routes (feat/station-prayagraj-junction-crossover)
+# Feature PR #82: Model Rani Kamlapati world-class station facilities (feat/station-bhopal-habibganj-modernization)
