@@ -42,3 +42,4 @@
 # Feature PR #42: Enforce instant emergency braking on red signal overshoot (Module: feat/kavach-spad-emergency-braking)
 # Feature PR #43: Compute continuous distance-to-collision curves (Module: feat/kavach-head-on-collision-prevention)
 # Feature PR #44: Configure dynamic target distance safety envelope (Module: feat/kavach-rear-end-protection-zone)
+# Feature PR #45: Implement stationary locomotive corridor SOS trigger (Module: feat/kavach-sos-broadcast-transmitter)
