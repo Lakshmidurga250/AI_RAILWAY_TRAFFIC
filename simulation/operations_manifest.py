@@ -39,3 +39,4 @@
 # Feature PR #39: Configure waterlogging speed restriction SOP (Module: feat/contingency-heavy-rainfall-submergence)
 # Feature PR #40: Deploy SIL-4 Kavach trackside RFID tag coordinates (Module: feat/kavach-sil4-rfid-waypoint-tags)
 # Feature PR #41: Generate UHF radio Movement Authority (MA) packets (Module: feat/kavach-movement-authority-packets)
+# Feature PR #42: Enforce instant emergency braking on red signal overshoot (Module: feat/kavach-spad-emergency-braking)
