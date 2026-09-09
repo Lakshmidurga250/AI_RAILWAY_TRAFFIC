@@ -77,6 +77,7 @@
 # Feature PR #78: Model Vijayawada Krishna river bridge bottlenecks (Module: feat/station-vijayawada-bypass-junction)
 # Feature PR #66: Add root poetry.lock backend specification (feat/lockfile-poetry-python-freeze)
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Feature PR #81: Model Prayagraj junction sangam multi-directional routes (Module: feat/station-prayagraj-junction-crossover)
 # Feature PR #69: Map Howrah-Chennai coastal trunk route (feat/corridor-golden-quadrilateral-howrah-chennai)
 # Feature PR #82: Model Rani Kamlapati world-class station facilities (Module: feat/station-bhopal-habibganj-modernization)
@@ -107,3 +108,12 @@
 # Feature PR #81: Model Prayagraj junction sangam multi-directional routes (feat/station-prayagraj-junction-crossover)
 # Feature PR #82: Model Rani Kamlapati world-class station facilities (feat/station-bhopal-habibganj-modernization)
 # Feature PR #83: Model Bengaluru KSR to Whitefield suburban chord (feat/station-bengaluru-city-krishnarajapuram)
+=======
+=======
+# Feature PR #57: Smooth train marker CSS transitions on real coordinates (feat/frontend-train-marker-kinematics)
+# Feature PR #69: Map Howrah-Chennai coastal trunk route (Module: feat/corridor-golden-quadrilateral-howrah-chennai)
+>>>>>>> feat/corridor-golden-quadrilateral-howrah-chennai
+# Feature PR #83: Model Bengaluru KSR to Whitefield suburban chord (Module: feat/station-bengaluru-city-krishnarajapuram)
+# Feature PR #70: Map Mumbai-Chennai deccan plateau mainline (feat/corridor-golden-quadrilateral-mumbai-chennai)
+>>>>>>> feat/station-bengaluru-city-krishnarajapuram
+# Feature PR #84: Model Pune-Lonavala 3-track ghat climbing coordinates (feat/station-pune-lonavala-ghat-banking)
