@@ -71,3 +71,6 @@
 # Feature PR #63: Enforce 24-hour cryptographic JWT session validity (feat/security-token-jwt-expiration)
 # Feature PR #75: Model Mumbai CSMT suburban & long-distance throat (Module: feat/station-mumbai-csmt-heritage-yard)
 # Feature PR #65: Add authoritative package-lock.json dependency graph (feat/lockfile-npm-package-freeze)
+# Feature PR #77: Model Secunderabad junction 10-track bypass layout (Module: feat/station-secunderabad-sc-hub)
+# Feature PR #78: Model Vijayawada Krishna river bridge bottlenecks (Module: feat/station-vijayawada-bypass-junction)
+# Feature PR #66: Add root poetry.lock backend specification (feat/lockfile-poetry-python-freeze)
