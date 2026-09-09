@@ -56,4 +56,9 @@
 # Feature PR #60: Display real-time emergency broadcast banner (Module: feat/frontend-incident-alert-banner)
 # Feature PR #49: Add top-bar dispatcher profile badge and logout flow (feat/auth-topbar-profile-actions)
 # Feature PR #51: Export dispatch latency and conflict rate metrics (feat/api-metrics-prometheus-observability)
+<<<<<<< HEAD
 # Feature PR #63: Enforce 24-hour cryptographic JWT session validity (Module: feat/security-token-jwt-expiration)
+=======
+>>>>>>> feat/api-metrics-prometheus-observability
+# Feature PR #52: Train multi-factor track conflict prediction network (feat/ai-conflict-prediction-classifier)
+# Feature PR #64: Remove sensitive .env tracking and enforce example.env (Module: feat/security-env-sanitize-secrets)
