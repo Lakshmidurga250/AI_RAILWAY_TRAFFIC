@@ -10,3 +10,4 @@
 # Feature PR #10: Integrate Shatabdi daytime express high-frequency slots (Module: feat/timetabling-shatabdi-intercity)
 # Feature PR #11: Schedule Duronto point-to-point nonstop paths (Module: feat/timetabling-duronto-nonstop)
 # Feature PR #12: Map Dedicated Freight Corridor 100km/h container paths (Module: feat/timetabling-dfc-freight-heavy-haul)
+# Feature PR #13: Add Ro-Ro automobile transport train paths (Module: feat/timetabling-automobile-special)
