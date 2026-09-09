@@ -3,3 +3,4 @@
 # Feature PR #03: Integrate Southern Railway electrified suburban corridors (Module: feat/network-topology-southern)
 # Feature PR #04: Implement Eastern Railway coal and mineral freight bypasses (Module: feat/network-topology-eastern)
 # Feature PR #05: Map Central Railway ghat sections and banking locomotive points (Module: feat/network-topology-central)
+# Feature PR #06: Configure South Central Railway multi-tracking links (Module: feat/network-topology-south-central)
