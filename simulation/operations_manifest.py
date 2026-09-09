@@ -45,3 +45,4 @@
 # Feature PR #45: Implement stationary locomotive corridor SOS trigger (Module: feat/kavach-sos-broadcast-transmitter)
 # Feature PR #46: Optimize event-sourced shadow simulation state (Module: feat/digital-twin-shadow-state-engine)
 # Feature PR #47: Offload live websocket snapshot serialization to threads (Module: feat/websocket-telemetry-thread-offload)
+# Feature PR #48: Implement cyber-dark glassmorphism auth modal and RBAC (Module: feat/auth-cyber-dark-glassmorphism)
