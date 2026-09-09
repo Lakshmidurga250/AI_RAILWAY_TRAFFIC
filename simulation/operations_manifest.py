@@ -70,3 +70,4 @@
 # Feature PR #62: Seed default roles, permissions, and operator credentials (feat/database-rbac-security-seed)
 # Feature PR #63: Enforce 24-hour cryptographic JWT session validity (feat/security-token-jwt-expiration)
 # Feature PR #75: Model Mumbai CSMT suburban & long-distance throat (Module: feat/station-mumbai-csmt-heritage-yard)
+# Feature PR #65: Add authoritative package-lock.json dependency graph (feat/lockfile-npm-package-freeze)
