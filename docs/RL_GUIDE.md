@@ -61,7 +61,45 @@ You can run and test the RL environment via the test suite:
 python -m pytest tests/test_rl.py -v
 ```
 
-All 3 core tests pass:
+All 9 core & advanced tests pass:
 - `test_gym_environment_initialization`: Validates observation and action space dimensions.
 - `test_gym_step_and_reward`: Validates physical transitions and multi-objective reward calculations.
 - `test_rule_based_baseline`: Validates dispatching performance comparison.
+- `test_safety_shield_signal_intervention`: Proves safety shield overrides hazardous dispatch under RED signals.
+- `test_action_masking`: Validates dynamic action space constraints.
+- `test_multi_agent_gym_env`: Validates decentralized cooperative dispatch transitions.
+- `test_ppo_actor_critic`: Validates PPO policy evaluation and advantage updates.
+- `test_rl_repository_audit`: Validates database persistence of training and inference telemetry.
+- `test_rl_api_endpoints`: Validates REST API `/optimization/rl/train`, `/dispatch`, and `/runs`.
+
+---
+
+## 5. Interlocking Safety Shield (`safety_shield.py`)
+
+- **ERTMS Level 2 Invariant**: Acts as an impenetrable runtime formal safety monitor.
+- **Fail-Safe Override**: If an RL policy proposes an unsafe action (e.g., accelerating into a Red signal block or trailing a lead train within $d < 2.0\text{ km}$), the Safety Shield intercepts the command and forces a safe hold (`HOLD_TRAIN`) or caution speed reduction.
+
+---
+
+## 6. Action Masking (`action_masking.py`)
+
+- Computes dynamic boolean masks $M(s) \in \{0, 1\}^5$ based on corridor topology and signaling.
+- Unmasked actions are assigned large negative logits ($-10^9$) prior to softmax sampling, preventing the policy from ever exploring physically impossible or illegal track actions.
+
+---
+
+## 7. Multi-Agent Cooperative Dispatching (`multi_agent_env.py`)
+
+- **Architecture**: Decentralized Multi-Agent Reinforcement Learning (MARL).
+- Each train in the corridor acts as an autonomous agent receiving localized sensor vectors and coordinating joint decisions to prevent corridor gridlocks at critical junction interchanges.
+
+---
+
+## 8. REST API Endpoints (`/optimization/rl/`)
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/optimization/rl/train` | Triggers background training loop (DQN or PPO) with safety metrics |
+| `POST` | `/optimization/rl/dispatch` | Dispatches protected action for a train with safety shield verification |
+| `GET`  | `/optimization/rl/runs` | Queries historical training convergence runs and reward curves |
+

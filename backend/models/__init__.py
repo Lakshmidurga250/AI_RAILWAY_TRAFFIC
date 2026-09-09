@@ -6,7 +6,7 @@ from backend.models.train import Train, ScheduleStop, TrainTelemetry, TrainEvent
 from backend.models.simulation import SimulationRun, SimulationEvent, Scenario
 from backend.models.conflict import Conflict, Disruption, DelayEvent
 from backend.models.optimization import OptimizationRun
-from backend.models.ai import AIModelRegistry, PredictionLog
+from backend.models.ai import AIModelRegistry, PredictionLog, RLTrainingRun, RLDispatchActionLog
 
 __all__ = [
     "Base",
@@ -48,4 +48,6 @@ __all__ = [
     "OptimizationRun",
     "AIModelRegistry",
     "PredictionLog",
+    "RLTrainingRun",
+    "RLDispatchActionLog",
 ]

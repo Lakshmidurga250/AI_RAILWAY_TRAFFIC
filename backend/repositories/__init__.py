@@ -9,6 +9,7 @@ from backend.repositories.network_repository import StationRepository, PlatformR
 from backend.repositories.disruption_repository import DisruptionRepository, DelayEventRepository
 from backend.repositories.schedule_repository import ScheduleRepository, ScheduleVersionRepository
 from backend.repositories.optimization_repository import OptimizationRepository
+from backend.repositories.rl_repository import RLRepository
 
 __all__ = [
     "BaseRepository",
@@ -27,4 +28,5 @@ __all__ = [
     "ScheduleRepository",
     "ScheduleVersionRepository",
     "OptimizationRepository",
+    "RLRepository",
 ]
