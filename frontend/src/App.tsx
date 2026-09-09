@@ -81,7 +81,7 @@ export function App() {
         api.getAnalyticsDashboard().catch(() => null),
       ]);
 
-      setState(prev => ({
+      setState((prev: any) => ({
         ...prev,
         trains: trainData || prev.trains,
         conflicts: conflictData || prev.conflicts,
@@ -109,7 +109,7 @@ export function App() {
   const handleSimControl = useCallback(async (action: 'start' | 'pause' | 'stop' | 'step') => {
     try {
       await api.controlSimulation(action);
-      setState(prev => ({
+      setState((prev: any) => ({
         ...prev,
         simRunning: action === 'start'
           ? true
@@ -123,7 +123,7 @@ export function App() {
   }, []);
 
   const handleSpeedChange = useCallback((speed: number) => {
-    setState(prev => ({ ...prev, simSpeed: speed }));
+    setState((prev: any) => ({ ...prev, simSpeed: speed }));
   }, []);
 
   // ─── Page Renderer ─────────────────────────────────────────
@@ -147,7 +147,7 @@ export function App() {
   };
 
   if (!authUser) {
-    return <LoginPage onLoginSuccess={(u) => setAuthUser(u)} />;
+    return <LoginPage onLoginSuccess={(u: any) => setAuthUser(u)} />;
   }
 
   return (
@@ -157,8 +157,8 @@ export function App() {
         state={state}
         onSimControl={handleSimControl}
         alertCount={state.alertCount}
-        onAlertsToggle={() => setAlertsPanelOpen(p => !p)}
-        onMenuToggle={() => setSidebarCollapsed(p => !p)}
+        onAlertsToggle={() => setAlertsPanelOpen((p: boolean) => !p)}
+        onMenuToggle={() => setSidebarCollapsed((p: boolean) => !p)}
       />
 
       <div className="main-content">
