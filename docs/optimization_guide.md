@@ -24,6 +24,11 @@ Where:
 ### 1.3 Floyd-Warshall All-Pairs Engine (`floyd_warshall.py`)
 Precomputes all-pairs shortest distance and travel-time matrices across all $N$ stations and junctions in $O(V^3)$ time, enabling $O(1)$ constant-time lookup during real-time conflict detection and dynamic rescheduling.
 
+### 1.4 Metaheuristic Route Solvers (`genetic_algorithm.py`, `particle_swarm.py`, `simulated_annealing.py`)
+- **Genetic Algorithm (GA)**: Evolves candidate route sequences across generations with tournament selection, crossover at shared topological junction nodes, and diversity mutations.
+- **Particle Swarm Optimization (PSO)**: Swarm particles explore route space using cognitive memory ($p_{\text{best}}$) and global social best ($g_{\text{best}}$) velocity guidance.
+- **Simulated Annealing (SA)**: Probabilistic hill-climbing using Boltzmann-Gibbs Metropolis acceptance criterion to escape local congestion optima during corridor re-routing.
+
 ---
 
 ## 2. Dynamic Timetable Scheduling (`optimization/scheduling/`)
@@ -62,3 +67,14 @@ Precomputes all-pairs shortest distance and travel-time matrices across all $N$ 
 - **Coasting Phase Optimization**: Computes optimal acceleration, cruising, coasting (power cut), and regenerative braking phases along varying track gradients.
 - **Regenerative Braking Recovery**: Recovers up to 35% of train kinetic energy back into the substation catenary grid during deceleration.
 - **Carbon Abatement**: Converts saved kilowatt-hours into metric tons of $\text{CO}_2$ abated based on grid emission factors ($0.45 \text{ kg CO}_2 / \text{kWh}$).
+
+---
+
+## 6. Optimization Audit & Telemetry Repository (`backend/repositories/optimization_repository.py`)
+
+- **Persistence Layer**: Tracks every execution of route search, timetable rescheduling, and eco-driving profile calculation in the `optimization_runs` database table.
+- **Audit Metrics**:
+  - `baseline_delay_minutes` vs. `optimized_delay_minutes` & `delay_reduction_percentage`
+  - `baseline_energy_kwh` vs. `optimized_energy_kwh` & `energy_savings_percentage`
+  - `conflicts_resolved` & `execution_time_ms`
+- **Query Endpoint**: `GET /optimization/runs` provides searchable telemetry filtered by optimization type (`ROUTING`, `RESCHEDULING`, `PLATFORM`, `ECO_DRIVING`).

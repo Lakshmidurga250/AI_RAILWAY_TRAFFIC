@@ -114,7 +114,8 @@ curl -X POST http://localhost:8000/simulation/scenarios \
 
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/optimization/route` | Computes Dijkstra, A*, or Multi-Objective Pareto paths |
+| `POST` | `/optimization/route` | Computes Dijkstra, A*, Floyd-Warshall, Multi-Objective, Genetic Algorithm, Particle Swarm, or Simulated Annealing routes |
+| `GET`  | `/optimization/runs` | Queries historical optimization runs with delay & energy benchmark audit telemetry |
 | `POST` | `/optimization/schedule` | Generates conflict-free headway timetable schedule |
 | `POST` | `/optimization/platforms`| Solves platform allocation to eliminate dwell conflicts |
 | `POST` | `/optimization/reschedule`| Solves dynamic rescheduling under active disruptions |
