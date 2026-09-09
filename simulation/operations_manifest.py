@@ -49,3 +49,5 @@
 # Feature PR #49: Add top-bar dispatcher profile badge and logout flow (Module: feat/auth-topbar-profile-actions)
 # Feature PR #41: Generate UHF radio Movement Authority (MA) packets (feat/kavach-movement-authority-packets)
 # Feature PR #51: Export dispatch latency and conflict rate metrics (Module: feat/api-metrics-prometheus-observability)
+# Feature PR #52: Train multi-factor track conflict prediction network (Module: feat/ai-conflict-prediction-classifier)
+# Feature PR #43: Compute continuous distance-to-collision curves (feat/kavach-head-on-collision-prevention)
