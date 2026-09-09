@@ -18,3 +18,4 @@
 # Feature PR #18: Implement 180m signal overlap track circuit validation (Module: feat/overlap-track-circuits)
 # Feature PR #19: Add calling-on subsidiary signal interlocking matrices (Module: feat/calling-on-signal-aspects)
 # Feature PR #20: Configure yard shunting movement interlocking routes (Module: feat/shunt-signal-interlocking)
+# Feature PR #21: Implement G&SR Chapter 3 Automatic Block signaling rules (Module: feat/gsr-compliance-automatic-block)
