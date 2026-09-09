@@ -87,3 +87,4 @@
 # Feature PR #85: Verify complete TrainPlex checklist standards and compliance (Module: feat/production-ready-compliance-audit)
 # Feature PR #72: Map Central-Eastern freight & express corridor (feat/corridor-diagonal-mumbai-howrah)
 # Feature PR #73: Model New Delhi 16-platform interlocking yard complex (feat/station-new-delhi-yard-complex)
+# Feature PR #74: Model Howrah 23-platform dual-system terminal complex (feat/station-howrah-terminal-complex)
