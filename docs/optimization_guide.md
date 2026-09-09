@@ -1,53 +1,32 @@
-# Optimization Systems & Decision-Support Guide
+# Railway Optimization Subsystem Guide
 
 ## 1. Multi-Objective Route Optimization
-
-When dispatching trains, the router balances competing operational objectives rather than optimizing distance in isolation:
-
-$$\min \quad J = w_1 \cdot T_{\text{travel}} + w_2 \cdot D_{\text{risk}} + w_3 \cdot C_{\text{congestion}} + w_4 \cdot E_{\text{traction}}$$
-
-Where:
-* $T_{\text{travel}}$: Total estimated run time based on track speed limits.
-* $D_{\text{risk}}$: Active conflicts along the candidate trajectory.
-* $C_{\text{congestion}}$: Average density of trains on constituent blocks.
-* $E_{\text{traction}}$: Traction energy required given distance and gradient profiles.
-
-The engine evaluates $k$-shortest paths using Dijkstra, A* with Euclidean heuristics, and Multi-Objective Pareto ranking.
+- **Implementation**: `optimization/routing/multi_objective.py`
+- **Objective Function**:
+  $$\min \sum \left( w_t \cdot T_{travel} + w_d \cdot D_{risk} + w_c \cdot C_{congestion} + w_e \cdot E_{traction} \right)$$
+- Evaluates $k$-shortest paths using NetworkX graph projections and scores composite Pareto fitness.
 
 ---
 
-## 2. Dynamic Timetable Scheduling
-
-The scheduler enforces strict safety spacing:
-* **Headway Constraint**: Departure spacing $\ge 180$ seconds between consecutive trains entering the same track corridor.
-* **Precedence Arbitration**: High-priority services (High-Speed / Emergency) are scheduled first; regional and freight services adjust around passenger express slots.
-
----
-
-## 3. Dynamic Disruption Rescheduling
-
-When a track closure or signal failure occurs:
-1. Identifies all active trains scheduled to traverse the blocked block.
-2. Re-evaluates graph topology with the affected edge assigned infinite cost ($w = \infty$).
-3. Computes detour paths via relief lines or passing loops.
-4. Harmonizes speed profiles on the diversion corridor.
-5. Quantifies improvement: Compares unmanaged baseline (cascading queue) against optimized rerouting, computing **delay reduction percentage** and **passenger-hours saved**.
+## 2. Dynamic Rescheduling & Disruption Recovery
+- **Implementation**: `optimization/rescheduling/rescheduler.py`
+- **Capabilities**:
+  - Handles track closures, signal interlocking failures, and severe weather.
+  - Automatically identifies affected trains and computes conflict-free detours.
+  - Generates verifiable Baseline vs. Optimized comparisons:
+    - Delay reduction percentage.
+    - Cascading conflicts eliminated.
+    - Passenger-delay-hours saved.
 
 ---
 
-## 4. Platform Assignment Optimization
-
-Station platform allocation evaluates:
-* Train length vs platform physical length ($L_{\text{platform}} \ge L_{\text{train}}$).
-* Temporal occupancy windows (ensuring no overlapping dwell).
-* Passenger accessibility ratings (proximity to concourse and transfers).
-* Overhead catenary availability for electric traction.
+## 3. Platform Assignment Optimization
+- **Implementation**: `optimization/platforms/assigner.py`
+- Evaluates platform length constraints, train length compatibility, passenger volume, catenary electrification, and passenger accessibility ratings.
 
 ---
 
-## 5. Eco-Driving Energy Optimization
-
-Models tractive effort and kinetic recovery:
-* Replaces hard braking with planned **coasting phases** prior to station approaches.
-* Harvests up to **35% of braking kinetic energy** via regenerative braking, feeding energy back into the distribution grid.
-* Reduces traction energy consumption by **15% to 22%** while staying within timetable margin.
+## 4. Traction Energy Optimization
+- **Implementation**: `ai/energy/model.py`
+- Models coasting windows and regenerative braking recovery (up to 35% of train kinetic energy).
+- Outputs recommended speed trajectories and estimated metric tons of $\text{CO}_2$ abated.

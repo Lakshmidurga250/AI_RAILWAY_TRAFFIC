@@ -151,11 +151,10 @@ class RailwayNetwork:
     def find_k_shortest_paths(self, origin_id: str, destination_id: str, k: int = 3, weight_type: str = "travel_time") -> List[List[str]]:
         """Find k alternative routes between two nodes."""
         try:
-            # Build simple DiGraph collapsing multigraph parallel edges to minimum weight
             simple_g = nx.DiGraph()
-            for u, v, k_id, d in self.graph.edges(keys=True, data=True):
+            for u, v, d in self.graph.edges(data=True):
                 w = self.calculate_weight(u, v, d, weight_type)
-                if w < float("inf"):
+                if w != float("inf"):
                     if simple_g.has_edge(u, v):
                         if w < simple_g[u][v]["weight"]:
                             simple_g[u][v]["weight"] = w
@@ -167,7 +166,7 @@ class RailwayNetwork:
             for _, path in zip(range(k), paths_gen):
                 result.append(path)
             return result
-        except (nx.NetworkXNoPath, nx.NodeNotFound, nx.NetworkXError):
+        except (nx.NetworkXNoPath, nx.NodeNotFound):
             return []
 
     def path_to_tracks(self, path: List[str]) -> List[TrackEdge]:

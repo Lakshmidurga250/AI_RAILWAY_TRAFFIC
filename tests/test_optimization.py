@@ -9,10 +9,11 @@ def test_dijkstra_vs_astar(test_network):
     dijk = DijkstraRouter.optimize_route(test_network, "ST_SOUTH", "ST_NORTH")
     astar = AStarRouter.optimize_route(test_network, "ST_SOUTH", "ST_NORTH")
     
-    assert dijk["optimal_route"] is not None
-    assert astar["optimal_route"] is not None
-    assert dijk["optimal_route"]["total_distance_km"] > 0
-    assert astar["optimal_route"]["total_distance_km"] > 0
+    assert dijk["path_nodes"] is not None
+    assert astar["path_nodes"] is not None
+    assert dijk["path_nodes"][0] == "ST_SOUTH"
+    assert astar["path_nodes"][-1] == "ST_NORTH"
+    assert dijk["total_distance_km"] > 0
 
 def test_multi_objective_pareto(test_network):
     res = MultiObjectiveRouter.optimize_route(test_network, "ST_SOUTH", "ST_SUMMIT")

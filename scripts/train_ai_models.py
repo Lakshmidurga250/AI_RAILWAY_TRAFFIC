@@ -1,38 +1,37 @@
-"""AI Model Training and Registry Synchronization CLI."""
+"""AI Model Training and Evaluation Script."""
 import sys
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(BASE_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from ai.data.synthetic import synthetic_generator
-from ai.delay_prediction.predictor import delay_predictor
+from ai.delay_prediction.predictor import DelayPredictor
 from ai.reinforcement_learning.trainer import RLTrainer
-from ai.registry.model_registry import model_registry
+from ai.data.synthetic import synthetic_generator
 
-def train_all():
-    print("=" * 60)
-    print("AI RAILWAY OPTIMIZATION: OFFLINE MODEL TRAINING PIPELINE")
-    print("=" * 60)
+def main():
+    print("=" * 65)
+    print("  TRAINING RAILWAY AI MODELS & BENCHMARKS")
+    print("=" * 65)
 
-    # 1. Delay Prediction Models
-    print("\n[1/3] Generating synthetic telemetry dataset (3,000 samples)...")
-    df = synthetic_generator.generate_delay_training_dataset(num_samples=3000)
-    print(f"Generated {len(df)} records across 13 operational features.")
+    # 1. Train Delay Predictor
+    print("\n[1/2] Generating synthetic operational dataset & training Gradient Boosting Delay Predictor...")
+    df = synthetic_generator.generate_delay_training_dataset(num_samples=1500)
+    predictor = DelayPredictor()
+    predictor.train_models(df)
+    
+    print("  Validation Metrics across Horizons:")
+    for h, m in predictor.metrics.items():
+        print(f"    Horizon {h:2d}m -> MAE: {m['MAE']:.3f}m | RMSE: {m['RMSE']:.3f}m | R2: {m['R2']:.3f}")
 
-    print("\n[2/3] Fitting Gradient Boosting Regressors across horizons (5m, 10m, 15m, 30m, 60m)...")
-    delay_predictor.train_models(df)
-    for h, metrics in delay_predictor.metrics.items():
-        print(f"  → Horizon {h:2d}m: MAE={metrics['MAE']:.3f}m | RMSE={metrics['RMSE']:.3f}m | R²={metrics['R2']:.3f}")
+    # 2. Train RL DQN Agent
+    print("\n[2/2] Training Reinforcement Learning DQN Dispatch Policy (10 episodes)...")
+    rl_results = RLTrainer.train_agent(episodes=10, max_steps_per_episode=25)
+    print(f"  Trained Mean Reward: {rl_results['trained_agent_eval']['mean_reward']}")
+    print(f"  Baseline Heuristic Reward: {rl_results['baseline_heuristic_eval']['mean_reward']}")
+    print(f"  Improvement vs Heuristic: +{rl_results['improvement_percentage']:.1f}%")
 
-    # 2. Reinforcement Learning
-    print("\n[3/3] Running DQN Dispatch Policy Training Loop (15 episodes)...")
-    rl_res = RLTrainer.train_agent(episodes=15, max_steps_per_episode=25)
-    print(f"  → Trained Mean Reward: {rl_res['trained_agent_eval']['mean_reward']}")
-    print(f"  → Baseline Heuristic:  {rl_res['baseline_heuristic_eval']['mean_reward']}")
-    print(f"  → Improvement:         +{rl_res['improvement_percentage']:.1f}%")
-
-    print("\n[OK] Model training complete. All models registered and validated.")
+    print("\n[+] All models trained and validated successfully.")
+    print("=" * 65)
 
 if __name__ == "__main__":
-    train_all()
+    main()

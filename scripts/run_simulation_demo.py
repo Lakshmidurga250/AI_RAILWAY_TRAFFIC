@@ -1,45 +1,43 @@
-"""Interactive CLI Simulation Demo."""
+"""Simulation CLI Demo Runner."""
 import sys
 import time
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(BASE_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from simulation.engine.simulator import SimulationEngine
-from simulation.network.loader import create_corridor_network
-from simulation.engine.digital_twin import DigitalTwin
+from simulation.engine.simulator import sim_engine
+from ai.delay_prediction.predictor import delay_predictor
+from ai.features.engineering import FeatureEngineer
+from optimization.conflicts.resolver import conflict_resolver
 
 def run_demo():
-    print("=" * 65)
-    print("AI RAILWAY TRAFFIC DISCRETE-EVENT SIMULATION DEMO")
-    print("=" * 65)
+    print("=" * 70)
+    print("  AI RAILWAY TRAFFIC OPTIMIZATION & DISCRETE SIMULATION DEMO")
+    print("=" * 70)
+    
+    print(f"\n[*] Loaded Corridor Network: {len(sim_engine.network.stations)} Stations, {len(sim_engine.network.tracks)} Tracks")
+    print(f"[*] Initial Active Fleet: {len(sim_engine.trains)} Trains")
 
-    engine = SimulationEngine(create_corridor_network())
-    engine.initialize_default_traffic()
-    dt = DigitalTwin(engine)
+    # Step simulation
+    print("\n[*] Stepping simulation across 5 discrete time steps (10s each)...")
+    for step_num in range(1, 6):
+        sim_engine.step(dt_seconds=10.0)
+        status = sim_engine.get_status_summary()
+        print(f"  Step {step_num}: Sim Time: {status['current_sim_time']} | Avg Delay: {status['average_delay_minutes']}m | Punctuality: {status['punctuality_percentage']}%")
 
-    print(f"[INIT] Loaded corridor network with {len(engine.network.stations)} stations, {len(engine.network.tracks)} tracks.")
-    print(f"[INIT] Active fleet initialized: {len(engine.trains)} passenger & freight trains.")
+    # Pick a train and run AI Delay Prediction
+    target_train = list(sim_engine.trains.values())[0]
+    print(f"\n[*] Running Multi-Horizon Delay Prediction for Train {target_train.train_number} ({target_train.name})...")
+    features = FeatureEngineer.extract_features_from_train(target_train)
+    prediction = delay_predictor.predict(features, horizon_minutes=15, current_delay=target_train.current_delay_minutes)
+    
+    print(f"  > Forecasted Delay (15 min): {prediction['predicted_delay_minutes']} min")
+    print(f"  > Confidence Score: {prediction['confidence'] * 100:.1f}%")
+    print(f"  > Top Contributing Factors: {[f['factor'] for f in prediction['contributing_factors'][:3]]}")
+    print(f"  > AI Narrative: {prediction['explanation']}")
 
-    print("\nRunning 10 simulation ticks (dt=10s, accelerated 5x)...")
-    for step in range(1, 11):
-        engine.step(dt_seconds=10.0)
-        snap = dt.get_live_snapshot()
-        sim_stat = snap["simulation"]
-        
-        train_summaries = []
-        for t in snap["trains"][:3]:
-            train_summaries.append(f"{t['train_number']}: {t['speed_kmh']}km/h ({t['status']})")
-
-        print(f"Step {step:2d} | Sim Time: {sim_stat['current_sim_time'][11:19]} | "
-              f"Delays: {sim_stat['average_delay_minutes']}m | "
-              f"Conflicts: {sim_stat['active_conflicts']} | "
-              f"Energy: {sim_stat['total_energy_kwh']:.1f} kWh")
-        print(f"        Fleet: {', '.join(train_summaries)}")
-        time.sleep(0.3)
-
-    print("\n[OK] Simulation demo successfully concluded.")
+    print("\n[+] Demo completed successfully. Web control center is available at http://localhost:8000")
+    print("=" * 70)
 
 if __name__ == "__main__":
     run_demo()

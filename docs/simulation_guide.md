@@ -1,38 +1,34 @@
-# Discrete-Event Railway Simulation Guide
+# Railway Simulation & Digital Twin Guide
 
-## 1. Physical Modeling & Dynamics
+## Overview
+The simulation subsystem provides a discrete-event and continuous-step railway simulator that accurately models physical train motion, block signaling, station dwell times, switch alignment, and cascade delay propagation.
 
-The simulator models train movement according to continuous kinematics and the empirical **Davis Equation**:
+## Key Modules
 
-$$R = A + B \cdot v + C \cdot v^2$$
+| Module | File | Purpose |
+|---|---|---|
+| **Graph Engine** | `simulation/network/graph.py` | Directed multigraph of stations, junctions, and tracks. |
+| **Corridor Loader** | `simulation/network/loader.py` | Default 10-station, 20-track double-line mainline. |
+| **Train Dynamics** | `simulation/trains/dynamics.py` | Physics kinematics and Davis resistance calculations. |
+| **Train Agent** | `simulation/trains/train.py` | State machine governing cruising, braking, and dwelling. |
+| **Block Signaling** | `simulation/signals/signaling.py` | 4-aspect automated block signal progression. |
+| **Conflict Detector**| `simulation/conflicts/detector.py`| Real-time spatial headway and junction conflict scanner. |
+| **Simulation Engine**| `simulation/engine/simulator.py` | Central clock, acceleration controller, and background loop. |
+| **Digital Twin** | `simulation/engine/digital_twin.py`| Synchronized live state shadow of the physical network. |
 
-Where:
-* $A$ represents mechanical resistance (flange friction, axle bearing resistance) in $N/kN$.
-* $B$ represents rolling resistance in $N / (kN \cdot km/h)$.
-* $C$ represents aerodynamic drag coefficient in $N / (kN \cdot (km/h)^2)$.
+## Simulation Commands via API
 
-### Gradient and Curve Resistance
-* **Gradient Resistance**: $R_{\text{gradient}} = m \cdot g \cdot \frac{\text{gradient}}{100}$
-* **Curve Resistance**: Calculated using the standard Roeckl formula when curvature radius is defined.
+```bash
+# Start background simulation
+curl -X POST http://localhost:8000/simulation/control \
+  -H "Content-Type: application/json" \
+  -d '{"action": "start"}'
 
-## 2. Signaling System
+# Accelerate simulation to 15x
+curl -X POST http://localhost:8000/simulation/control \
+  -H "Content-Type: application/json" \
+  -d '{"action": "accelerate", "acceleration_factor": 15.0}'
 
-The simulator uses a 4-aspect block signaling hierarchy:
-1. **GREEN**: Clear block ahead; train is permitted to travel at maximum permissible track speed.
-2. **DOUBLE YELLOW**: Preliminary caution; next signal is at Yellow. Driver prepares to decelerate.
-3. **YELLOW**: Caution; next signal is at Red (Danger). Braking required immediately.
-4. **RED**: Danger; block occupied. Absolute stop required before signal marker.
-
-## 3. Platform Dwell Dynamics
-
-Platform dwell time is dynamic rather than fixed, computing passenger exchange rates:
-
-$$\text{Dwell Time} = 25\text{s} + \frac{\text{Passengers On} + \text{Passengers Off}}{\text{Number of Doors} \times 1.1}$$
-
-Bounded between 60 seconds (minimum safety dwell) and 300 seconds (congested dwell).
-
-## 4. Simulation Modes
-* **Real-time (1x)**: Advances 1 simulation second per real-time second.
-* **Accelerated (5x - 60x)**: Fast-forwards operational shifts for dispatch throughput analysis.
-* **Step Mode**: Advances discrete increments (e.g. 10s per call) for deterministic algorithmic evaluation.
-* **What-If Scenario Simulation**: Injects track closures, signal failures, or weather disruptions and computes baseline vs optimized operational impact.
+# Fetch synchronized live snapshot
+curl http://localhost:8000/simulation/snapshot
+```

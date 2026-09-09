@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List
 from simulation.engine.simulator import sim_engine
+from simulation.events.event_bus import event_bus
 
 class AnalyticsService:
     @classmethod
@@ -89,5 +90,6 @@ class AnalyticsService:
                     {"time": "14:00", "consumption_kwh": 2200, "regenerated_kwh": 640},
                     {"time": "16:00", "consumption_kwh": 3800, "regenerated_kwh": 1100},
                 ],
+                "recent_events": [e.model_dump(mode="json") for e in event_bus.get_history(limit=10)],
                 "timestamp": now.isoformat()
             }

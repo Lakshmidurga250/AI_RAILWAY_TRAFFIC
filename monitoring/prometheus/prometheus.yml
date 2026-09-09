@@ -3,14 +3,7 @@ global:
   evaluation_interval: 5s
 
 scrape_configs:
-  - job_name: 'railway-backend'
-    metrics_path: '/metrics'
+  - job_name: "railway_ai_backend"
+    metrics_path: "/metrics"
     static_configs:
-      - targets: ['backend:8000', 'localhost:8000']
-        labels:
-          application: 'ai-railway-system'
-          environment: 'production'
-
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["backend:8000"]

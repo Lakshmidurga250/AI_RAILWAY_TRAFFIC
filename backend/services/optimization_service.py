@@ -25,7 +25,34 @@ class OptimizationService:
         else:
             res = MultiObjectiveRouter.optimize_route(sim_engine.network, origin_station_id, destination_station_id)
 
-        res["train_id"] = train_id or "GENERIC_SERVICE"
+        if "optimal_route" not in res:
+            path_nodes = res.get("path_nodes", [])
+            track_ids = res.get("track_ids", [])
+            dist_km = res.get("total_distance_km", 0.0)
+            travel_time_min = round((dist_km / 120.0) * 60.0, 1)
+            raw_score = res.get("score", 1.0)
+            score_val = float(raw_score) if (raw_score != float("inf") and str(raw_score) != "inf") else 999.0
+            optimal_opt = {
+                "route_id": f"RTE_{alg_upper}",
+                "track_ids": track_ids,
+                "station_ids": path_nodes,
+                "total_distance_km": dist_km,
+                "estimated_travel_time_min": travel_time_min,
+                "estimated_energy_kwh": round(dist_km * 12.5, 1),
+                "congestion_score": 0.2,
+                "conflicts_count": 0,
+                "composite_score": score_val
+            }
+            res = {
+                "train_id": train_id or "GENERIC_SERVICE",
+                "algorithm": alg_upper,
+                "optimal_route": optimal_opt,
+                "alternative_routes": [],
+                "execution_time_ms": res.get("execution_time_ms", 1.0),
+                "explanation": f"Optimal path calculated using {alg_upper}: {len(path_nodes)} nodes, {dist_km} km."
+            }
+        else:
+            res["train_id"] = train_id or "GENERIC_SERVICE"
         return res
 
     @classmethod

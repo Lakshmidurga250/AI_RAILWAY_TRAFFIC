@@ -1,22 +1,18 @@
-"""Database Seeder Script: Initializes default admin, stations, tracks, and trains."""
+"""Database Seeder Script: Populates initial stations, tracks, trains, and admin account."""
 import sys
-import os
 from pathlib import Path
 
 # Add project root to sys.path
-BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(BASE_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from backend.app.database import engine, Base, SessionLocal
 from backend.models.user import User
-from backend.models.network import Station, Platform, Track, Junction, Signal
-from backend.models.train import Train, ScheduleStop
+from backend.models.network import Station, Platform, Track
 from backend.app.security import get_password_hash
 from simulation.network.loader import create_corridor_network
-from datetime import datetime, timedelta, timezone
 
 def seed():
-    print("[INFO] Creating database schema tables...")
+    print("[*] Creating database schema...")
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
@@ -28,17 +24,16 @@ def seed():
                 username="admin",
                 email="admin@railway-ai.internal",
                 hashed_password=get_password_hash("AdminPass123!"),
-                full_name="Lead Operations Dispatcher",
-                role="admin",
-                is_active=True
+                full_name="Operations Commander",
+                role="admin"
             )
             db.add(admin)
-            print("[OK] Created default administrator: admin / AdminPass123!")
+            print("[+] Seeded admin user: 'admin' (password: 'AdminPass123!')")
 
-        # 2. Sync network stations
+        # 2. Network Stations & Tracks from corridor network
         net = create_corridor_network()
-        for st in net.stations.values():
-            existing_st = db.query(Station).filter(Station.id == st.id).first()
+        for st_id, st in net.stations.items():
+            existing_st = db.query(Station).filter(Station.id == st_id).first()
             if not existing_st:
                 db_st = Station(
                     id=st.id,
@@ -52,7 +47,9 @@ def seed():
                     status=st.status
                 )
                 db.add(db_st)
-                for p in st.platforms.values():
+                db.flush()
+
+                for p_id, p in st.platforms.items():
                     db_p = Platform(
                         id=p.id,
                         station_id=st.id,
@@ -65,9 +62,8 @@ def seed():
                     )
                     db.add(db_p)
 
-        # 3. Sync tracks
-        for trk in net.tracks.values():
-            existing_trk = db.query(Track).filter(Track.id == trk.id).first()
+        for trk_id, trk in net.tracks.items():
+            existing_trk = db.query(Track).filter(Track.id == trk_id).first()
             if not existing_trk:
                 db_trk = Track(
                     id=trk.id,
@@ -85,7 +81,7 @@ def seed():
                 db.add(db_trk)
 
         db.commit()
-        print("[OK] Railway infrastructure entities seeded successfully.")
+        print(f"[+] Successfully seeded {len(net.stations)} stations and {len(net.tracks)} tracks into database.")
     finally:
         db.close()
 

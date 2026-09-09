@@ -62,6 +62,7 @@ class MultiObjectiveRouter:
             evaluated_options.append({
                 "route_id": f"RTE_OPT_{idx + 1}",
                 "path_nodes": path,
+                "station_ids": path,
                 "track_ids": [t.id for t in tracks],
                 "total_distance_km": round(dist_km, 2),
                 "estimated_travel_time_min": round(travel_time_min, 1),
