@@ -14,3 +14,4 @@
 # Feature PR #14: Configure peak suburban commuter train headways (Module: feat/timetabling-suburban-rush-hour)
 # Feature PR #15: Implement SIL-4 Electronic Interlocking route locking (Module: feat/electronic-interlocking-routes)
 # Feature PR #16: Add automatic flank protection derail point enforcement (Module: feat/flank-protection-derailers)
+# Feature PR #17: Configure approach locking 120s timer safety circuits (Module: feat/approach-locking-timers)
