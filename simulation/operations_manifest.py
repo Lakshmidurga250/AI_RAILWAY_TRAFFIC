@@ -63,4 +63,5 @@
 # Feature PR #52: Train multi-factor track conflict prediction network (feat/ai-conflict-prediction-classifier)
 # Feature PR #64: Remove sensitive .env tracking and enforce example.env (Module: feat/security-env-sanitize-secrets)
 # Feature PR #54: Train PPO policy for automated loop line dispatching (feat/ai-reinforcement-learning-dispatcher)
-# Feature PR #67: Map Delhi-Mumbai 160km/h semi-high-speed route (Module: feat/corridor-golden-quadrilateral-delhi-mumbai)
+# Feature PR #68: Map Delhi-Howrah high-density coal & passenger trunk (Module: feat/corridor-golden-quadrilateral-delhi-howrah)
+# Feature PR #56: Enhance SVG track schematic with dynamic switch states (feat/frontend-interactive-topology-svg)
