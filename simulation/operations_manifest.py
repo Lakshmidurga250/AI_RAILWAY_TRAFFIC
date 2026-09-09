@@ -6,3 +6,4 @@
 # Feature PR #06: Configure South Central Railway multi-tracking links (Module: feat/network-topology-south-central)
 # Feature PR #07: Implement Konkan Railway anti-collision radar waypoints (Module: feat/network-topology-konkan)
 # Feature PR #08: Add 160 km/h Vande Bharat timetable schedules (Module: feat/timetabling-vande-bharat-express)
+# Feature PR #09: Configure Rajdhani express priority slot assignments (Module: feat/timetabling-rajdhani-premium)
