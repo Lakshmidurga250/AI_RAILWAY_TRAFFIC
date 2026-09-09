@@ -127,3 +127,4 @@
 # Feature PR #79: Validate SIL-4 Kavach UHF radio packets with CRC-32 integrity (feat/kavach-wireless-packet-validation)
 # Feature PR #80: Simulate continuous welded rail thermal expansion under high summer heat (feat/rail-thermal-stress-expansion-curve)
 # Feature PR #81: Implement dual-operator cooperative reset protocol for digital axle counters (feat/axle-counter-reset-interlocking)
+# Feature PR #82: Calculate regenerative braking energy recovery metrics for WAP-7 locomotives (feat/dynamic-braking-energy-regeneration)
