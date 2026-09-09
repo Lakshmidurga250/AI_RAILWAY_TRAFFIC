@@ -28,3 +28,4 @@
 # Feature PR #28: Record WAG-12 12000HP heavy-haul electric telemetry (Module: feat/telemetry-wag12-twin-electric)
 # Feature PR #29: Implement 25kV catenary voltage drop diagnostics (Module: feat/telemetry-ohe-voltage-sag-monitor)
 # Feature PR #30: Track pneumatic brake pipe 5.0 bar pressure gradients (Module: feat/telemetry-brake-pipe-pressure-drop)
+# Feature PR #31: Record axle-box and bogie vibration frequency spectra (Module: feat/telemetry-bogie-vibration-accelerometer)
