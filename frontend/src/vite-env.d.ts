@@ -71,9 +71,7 @@ declare module 'react-dom/client' {
   };
 }
 
-declare module 'lucide-react' {
-  export const [key: string]: any;
-}
+declare module 'lucide-react';
 
 declare module 'recharts' {
   export const ResponsiveContainer: any;
@@ -93,9 +91,7 @@ declare module 'recharts' {
   export const Cell: any;
 }
 
-declare module 'leaflet' {
-  export const [key: string]: any;
-}
+declare module 'leaflet';
 
 declare module 'clsx' {
   export default function clsx(...args: any[]): string;
