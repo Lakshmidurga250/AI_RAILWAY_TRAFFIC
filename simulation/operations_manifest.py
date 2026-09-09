@@ -22,3 +22,4 @@
 # Feature PR #22: Add G&SR Absolute Block line clear token exchange (Module: feat/gsr-compliance-absolute-block)
 # Feature PR #23: Configure temporary engineering speed restrictions (TSR) (Module: feat/gsr-speed-restrictions-engineering)
 # Feature PR #24: Implement fog signal detonator and visibility distance rules (Module: feat/gsr-fog-signaling-safety)
+# Feature PR #25: Enforce shunting speed limits and guard escort clauses (Module: feat/gsr-shunting-safety-invariants)
