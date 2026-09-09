@@ -32,6 +32,7 @@ class SimulationEngine:
         
         self.total_energy_kwh = 0.0
         self.resolved_conflicts_count = 0
+        self.step_counter = 0
         self._worker_thread: Optional[threading.Thread] = None
 
     def initialize_default_traffic(self):
@@ -144,6 +145,31 @@ class SimulationEngine:
             
             # 4. Tally metrics
             self.total_energy_kwh = sum(t.cumulative_energy_kwh for t in self.trains.values())
+            self.step_counter += 1
+
+            # 5. Record replay snapshot
+            from simulation.engine.replay import historical_replayer
+            historical_replayer.record_step(
+                self.sim_time,
+                self.step_counter,
+                {
+                    "sim_time": self.sim_time.isoformat(),
+                    "step": self.step_counter,
+                    "trains": [
+                        {
+                            "id": t.id,
+                            "train_number": t.train_number,
+                            "speed_kmh": round(t.current_speed_kmh, 1),
+                            "delay_minutes": round(t.current_delay_minutes, 1),
+                            "lat": t.current_lat,
+                            "lng": t.current_lng,
+                            "status": t.status
+                        }
+                        for t in self.trains.values()
+                    ],
+                    "conflicts": list(self.conflict_detector.active_conflicts.keys())
+                }
+            )
 
     def start(self):
         """Start background simulation loop."""

@@ -1,7 +1,7 @@
 """Network schemas: Stations, Platforms, Tracks, Signals, Junctions, Switches."""
 from typing import List, Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class PlatformSchema(BaseModel):
     id: str
@@ -14,8 +14,7 @@ class PlatformSchema(BaseModel):
     status: str = "AVAILABLE"
     has_overhead_catenary: bool = True
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class StationSchema(BaseModel):
     id: str
@@ -29,8 +28,7 @@ class StationSchema(BaseModel):
     status: str = "OPERATIONAL"
     platforms: List[PlatformSchema] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TrackSchema(BaseModel):
     id: str
@@ -47,8 +45,7 @@ class TrackSchema(BaseModel):
     current_train_id: Optional[str] = None
     speed_restriction: Optional[float] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class JunctionSchema(BaseModel):
     id: str
@@ -59,8 +56,7 @@ class JunctionSchema(BaseModel):
     current_load: int = 0
     status: str = "CLEAR"
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SignalSchema(BaseModel):
     id: str
@@ -70,8 +66,7 @@ class SignalSchema(BaseModel):
     signal_type: str = "AUTOMATIC"
     is_faulty: bool = False
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SwitchSchema(BaseModel):
     id: str
@@ -80,8 +75,7 @@ class SwitchSchema(BaseModel):
     is_locked: bool = False
     locked_for_train_id: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class NetworkGraphResponse(BaseModel):
     nodes: List[dict]

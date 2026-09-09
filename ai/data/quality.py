@@ -1,5 +1,4 @@
-"""Railway Data Quality Checker and Assurance Engine."""
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 import pandas as pd
 from datetime import datetime
 
@@ -61,4 +60,47 @@ class DataQualityChecker:
             "status": status,
             "issues_sample": issues[:10],
             "rejected_records": rejected[:5]
+        }
+
+    @classmethod
+    def audit_timetable_batch(cls, services: List[Dict[str, Any]], known_stations: Optional[List[str]] = None) -> Dict[str, Any]:
+        """Validate timetable services for logical schedule consistency."""
+        if not services:
+            return {"score": 100.0, "status": "PASSED", "total_services": 0, "issues": []}
+
+        valid_count = 0
+        issues = []
+        for s in services:
+            svc_issues = []
+            if not s.get("train_id"):
+                svc_issues.append("Missing train_id")
+            stops = s.get("stops", [])
+            if len(stops) < 2:
+                svc_issues.append(f"Service {s.get('train_id')} has fewer than 2 stops")
+
+            seen_seqs = set()
+            for stop in stops:
+                seq = stop.get("stop_sequence")
+                if seq in seen_seqs:
+                    svc_issues.append(f"Duplicate stop sequence {seq}")
+                seen_seqs.add(seq)
+                stn = stop.get("station_id")
+                if known_stations and stn not in known_stations:
+                    svc_issues.append(f"Unknown station_id '{stn}'")
+                dwell = stop.get("dwell_seconds", 0)
+                if dwell < 0 or dwell > 3600:
+                    svc_issues.append(f"Unrealistic dwell time {dwell}s")
+
+            if svc_issues:
+                issues.extend(svc_issues)
+            else:
+                valid_count += 1
+
+        score = round((valid_count / len(services)) * 100.0, 2)
+        return {
+            "total_services": len(services),
+            "valid_services": valid_count,
+            "score": score,
+            "status": "PASSED" if score >= 90.0 else "FAILED",
+            "issues": issues[:15]
         }

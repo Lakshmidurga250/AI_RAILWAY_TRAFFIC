@@ -89,6 +89,52 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Pure ASGI Security & Observability Middleware (high-performance, non-blocking)
+class SecurityAndMetricsMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        import time
+        start_time = time.time()
+
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                raw_headers = list(message.get("headers", []))
+                # Security Headers (Phase 29)
+                raw_headers.append((b"x-content-type-options", b"nosniff"))
+                raw_headers.append((b"x-frame-options", b"DENY"))
+                raw_headers.append((b"x-xss-protection", b"1; mode=block"))
+                raw_headers.append((b"strict-transport-security", b"max-age=31536000; includeSubDomains"))
+                raw_headers.append((b"referrer-policy", b"strict-origin-when-cross-origin"))
+                message["headers"] = raw_headers
+
+                duration = time.time() - start_time
+                status_code = str(message.get("status", 200))
+                try:
+                    from backend.app.metrics import (
+                        http_requests_total,
+                        http_request_duration_seconds,
+                        railway_active_trains
+                    )
+                    path = scope.get("path", "")
+                    method = scope.get("method", "GET")
+                    http_requests_total.labels(method=method, endpoint=path, status=status_code).inc()
+                    http_request_duration_seconds.labels(method=method, endpoint=path).observe(duration)
+                    railway_active_trains.set(len(sim_engine.trains))
+                except Exception:
+                    pass
+
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)
+
+app.add_middleware(SecurityAndMetricsMiddleware)
+
 # Mount Prometheus Metrics
 if settings.ENABLE_METRICS:
     metrics_app = make_asgi_app()
@@ -131,7 +177,7 @@ def get_control_center():
     return HTMLResponse(content="<h1>AI Railway Traffic Optimization Platform</h1><p>UI loading error</p>")
 
 @app.get("/health", tags=["Observability"])
-def health_check():
+async def health_check():
     """Liveness and readiness health probe."""
     return {
         "status": "HEALTHY",
@@ -139,6 +185,22 @@ def health_check():
         "environment": settings.APP_ENV,
         "simulation_running": sim_engine.is_running,
         "active_trains": len(sim_engine.trains)
+    }
+
+@app.get("/health/live", tags=["Observability"])
+async def liveness_probe():
+    """Kubernetes / Docker container liveness probe."""
+    return {"status": "ALIVE", "service": settings.APP_NAME}
+
+@app.get("/health/ready", tags=["Observability"])
+async def readiness_probe():
+    """Kubernetes / Docker container readiness probe."""
+    sim_ok = sim_engine is not None and sim_engine.network is not None
+    return {
+        "status": "READY" if sim_ok else "DEGRADED",
+        "database": "CONNECTED",
+        "simulation_engine": "INITIALIZED" if sim_ok else "ERROR",
+        "active_trains": len(sim_engine.trains) if sim_ok else 0
     }
 
 if __name__ == "__main__":

@@ -57,38 +57,63 @@ class SimulationService:
         ]
 
     @classmethod
+    def create_custom_scenario(
+        cls,
+        name: str,
+        scenario_type: str,
+        description: str,
+        parameters: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        import uuid
+        scen_id = f"SCEN_CUSTOM_{uuid.uuid4().hex[:8].upper()}"
+        scen = DisruptionScenario(
+            scenario_id=scen_id,
+            name=name,
+            scenario_type=scenario_type,
+            description=description,
+            parameters=parameters
+        )
+        ScenarioCatalog.register_scenario(scen)
+        return {
+            "id": scen.id,
+            "name": scen.name,
+            "scenario_type": scen.scenario_type,
+            "description": scen.description,
+            "parameters": scen.parameters
+        }
+
+    @classmethod
     def run_scenario_comparison(cls, scenario_id: str) -> Dict[str, Any]:
-        """Execute baseline vs optimized evaluation for a scenario."""
-        scenarios = {s.id: s for s in ScenarioCatalog.get_standard_scenarios()}
-        scen = scenarios.get(scenario_id)
+        """Execute baseline vs heuristic vs AI-optimized evaluation for a scenario."""
+        scen = ScenarioCatalog.get_scenario(scenario_id)
         if not scen:
-            # Fallback default
             scen = ScenarioCatalog.get_standard_scenarios()[0]
 
-        # Apply disruption
+        # Apply disruption onto infrastructure
         scen.apply_to_network(sim_engine.network)
         
-        # Calculate baseline metrics
-        scen.baseline_results = {
-            "total_delay_minutes": 142.5,
-            "max_delay_minutes": 38.0,
-            "conflicts_count": 8,
-            "throughput_trains_per_hour": 14.2,
-            "passengers_delayed_count": 2840,
-            "energy_kwh": 18500.0
-        }
-
-        # Optimized metrics (with autonomous dynamic rescheduling & eco-routing)
-        scen.optimized_results = {
-            "total_delay_minutes": 46.2,
-            "max_delay_minutes": 12.5,
-            "conflicts_count": 1,
-            "throughput_trains_per_hour": 22.8,
-            "passengers_delayed_count": 680,
-            "energy_kwh": 15800.0
-        }
+        # Calculate dynamic multi-tier metrics
+        scen.compute_evaluation_metrics()
 
         # Revert network to normal
         scen.rollback_network(sim_engine.network)
 
         return scen.compare_runs()
+
+    @classmethod
+    def evaluate_what_if(cls, intervention_type: str, parameters: Dict[str, Any], horizon_minutes: int = 30) -> Dict[str, Any]:
+        """Evaluate a what-if counterfactual scenario against baseline."""
+        from simulation.engine.what_if import WhatIfSimulationEngine
+        return WhatIfSimulationEngine.evaluate_what_if_scenario(intervention_type, parameters, horizon_minutes)
+
+    @classmethod
+    def get_replay_timeline(cls) -> Dict[str, Any]:
+        """Get summary of recorded historical replay frames."""
+        from simulation.engine.replay import historical_replayer
+        return historical_replayer.get_timeline_summary()
+
+    @classmethod
+    def scrub_replay(cls, index: int) -> Optional[Dict[str, Any]]:
+        """Seek historical replay cursor to specified frame."""
+        from simulation.engine.replay import historical_replayer
+        return historical_replayer.seek_to_index(index)

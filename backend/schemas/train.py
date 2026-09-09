@@ -1,7 +1,7 @@
 """Train schemas."""
 from typing import List, Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class ScheduleStopSchema(BaseModel):
     id: Optional[int] = None
@@ -15,8 +15,7 @@ class ScheduleStopSchema(BaseModel):
     dwell_duration_seconds: int = 120
     status: str = "PENDING"
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TrainCreate(BaseModel):
     id: str
@@ -77,8 +76,7 @@ class TrainResponse(BaseModel):
     regenerated_energy_kwh: float
     schedules: List[ScheduleStopSchema] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TelemetryPoint(BaseModel):
     train_id: str

@@ -2,10 +2,10 @@
 
 ## 1. High-Level Architecture
 
-The **AI Railway Traffic Optimization & Intelligent Train Management System** is structured as an event-driven, micro-modular monorepo where real-time discrete simulation, predictive machine learning, mathematical optimization, and operational telemetry converge through a synchronized **Digital Twin**.
+The **AI Railway Traffic Optimization & Intelligent Train Management System** is structured as an event-driven monorepo where real-time discrete simulation, predictive machine learning, mathematical optimization, and operational telemetry converge through a synchronized **Digital Twin**.
 
 ```
-Railway Infrastructure (NetworkX Directed Graph)
+Railway Infrastructure (NetworkX Directed Multigraph)
                │
                ▼
 Discrete-Event Kinematic Simulator (Davis Formula, 4-Aspect Signaling, Interlocking)
@@ -34,19 +34,21 @@ AI Predictive Models            Conflict Arbiter           Optimization Engines
             FastAPI Production Backend
             - REST Endpoints (12 Resource Routers)
             - Real-Time WebSocket Channel (/ws/live)
-            - Prometheus Metrics (/metrics)
+            - Pure ASGI Security & Prometheus Metrics (/metrics)
+            - Async Probes (/health/live, /health/ready)
                        │
                        ▼
      Operations Control Center Dashboard (SPA)
      - Interactive Leaflet SVG Track Map
      - Live Animated Fleet Telemetry
-     - Scenario Builder & What-If Comparator
-     - AI Model Registry & Analytics
+     - Custom Scenario Builder & 6-Card Multi-Tier Comparator
+     - AI Model Registry (Retrain, Benchmark Evaluate, Versions)
+     - System Observability & Metrics Inspector
 ```
 
 ---
 
-## 2. Subsystem Specifications
+## 2. End-to-End Subsystem Specifications
 
 ### 2.1. Network Infrastructure & Graph Engine
 - **Module**: `simulation/network/`
@@ -60,7 +62,7 @@ AI Predictive Models            Conflict Arbiter           Optimization Engines
 ### 2.2. Physics & Kinematics Engine
 - **Module**: `simulation/trains/dynamics.py`
 - **Davis Formula for Total Resistance**:
-  $$R_{total} = (A + B \cdot v + C \cdot v^2) \cdot m \cdot g + m \cdot g \cdot \sin(\theta) + R_{curve}$$
+  $$R_{\text{total}} = (A + B \cdot v + C \cdot v^2) \cdot m \cdot g + m \cdot g \cdot \sin(\theta) + R_{\text{curve}}$$
 - **Kinematic Step**: Computes tractive effort, inertial forces, speed evolution, and regenerative braking recovery (35% standard energy recovery efficiency).
 
 ### 2.3. Real-Time Conflict Detection
@@ -84,10 +86,18 @@ AI Predictive Models            Conflict Arbiter           Optimization Engines
 - **Reinforcement Learning Dispatch**:
   - Gymnasium-compatible `RailwayGymEnv` with DQN policy.
   - Reward function: Conflict avoidance + delay reduction + throughput bonus.
+- **Model Registry Lifecycle**:
+  - Validates transitions (`TRAINING` $\to$ `VALIDATED` $\to$ `ACTIVE`), supports retrain triggers, benchmark evaluations, and version history.
 
 ### 2.5. Mathematical & Heuristic Optimization
 - **Module**: `optimization/`
-- **Routing**: Dijkstra, A*, and Multi-Objective Pareto Router (travel time, congestion, energy, conflicts).
+- **Routing**: Dijkstra, A*, Floyd-Warshall all-pairs, and Multi-Objective Pareto Router (travel time, congestion, energy, conflicts).
 - **Scheduling**: Priority-constrained headway timetable generator.
-- **Dynamic Rescheduling**: Autonomous disruption recovery (track closure, signal failures) with verified baseline vs. optimized comparison.
+- **Dynamic Rescheduling**: Autonomous disruption recovery (track closure, signal failures) with verified baseline vs. heuristic vs. optimized comparison.
 - **Energy Optimization**: Coasting and regenerative braking trajectory generation yielding 15-20% energy savings.
+
+### 2.6. Security & Observability Architecture
+- **Pure ASGI Security & Metrics Middleware**: Directly wraps ASGI `receive`/`send` streams, injecting security headers (`X-Content-Type-Options`, `X-Frame-Options`, `HSTS`) and measuring request durations.
+- **Async Health Probes**: `GET /health/live` and `GET /health/ready` endpoints returning sub-millisecond status without threadpool stalls.
+- **Prometheus Metrics**: 12 custom application metrics exposed at `GET /metrics`.
+- **Containerization**: 7 Docker services (`backend`, `frontend`, `worker`, `postgres`, `redis`, `prometheus`, `grafana`).

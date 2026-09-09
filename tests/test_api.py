@@ -76,3 +76,28 @@ def test_reports_operational(client: TestClient):
     assert response.status_code == 200
     data = response.json()
     assert "executive_summary" in data
+
+    csv_res = client.get("/reports/operational?format=csv")
+    assert csv_res.status_code == 200
+    assert "text/csv" in csv_res.headers["content-type"]
+
+def test_reports_all_domains(client: TestClient):
+    # Delay report
+    r_delay = client.get("/reports/delay?format=json")
+    assert r_delay.status_code == 200
+    assert "train_level_delays" in r_delay.json()
+
+    # Congestion report
+    r_cong = client.get("/reports/congestion?format=json")
+    assert r_cong.status_code == 200
+    assert "station_utilization" in r_cong.json()
+
+    # Energy report
+    r_energy = client.get("/reports/energy?format=json")
+    assert r_energy.status_code == 200
+    assert "recovery_efficiency_pct" in r_energy.json()
+
+    # AI models report
+    r_models = client.get("/reports/ai-models")
+    assert r_models.status_code == 200
+    assert "total_registered_models" in r_models.json()

@@ -1,7 +1,7 @@
 """AI & Machine Learning Schemas."""
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class DelayPredictionRequest(BaseModel):
     train_id: str
@@ -61,9 +61,26 @@ class AIModelCard(BaseModel):
     algorithm: str
     version: str
     status: str
+    dataset: Optional[str] = None
     metrics: Dict[str, float]
     feature_names: List[str]
+    hyperparameters: Optional[Dict[str, Any]] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+class ModelTrainingRequest(BaseModel):
+    hyperparameters: Optional[Dict[str, Any]] = None
+    dataset: Optional[str] = None
+
+class ModelEvaluationResponse(BaseModel):
+    model_id: str
+    name: str
+    version: str
+    task: str
+    evaluation_timestamp: str
+    dataset_evaluated: str
+    current_metrics: Dict[str, float]
+    baseline_metrics: Dict[str, Optional[float]]
+    validation_status: str
+    recommendation: str

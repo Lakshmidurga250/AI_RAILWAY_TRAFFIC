@@ -148,6 +148,30 @@ class RailwayNetwork:
         except (nx.NetworkXNoPath, nx.NodeNotFound):
             return None
 
+    def to_simple_digraph(self, weight_attribute: str = "length_km") -> nx.DiGraph:
+        """Project MultiDiGraph to a directed simple graph taking minimum edge weight."""
+        simple_g = nx.DiGraph()
+        for node in self.graph.nodes():
+            simple_g.add_node(node)
+
+        for u, v, d in self.graph.edges(data=True):
+            track: Optional[TrackEdge] = d.get("data")
+            if track:
+                if track.is_maintenance_closed:
+                    continue
+                w = getattr(track, weight_attribute, 1.0)
+            else:
+                w = d.get(weight_attribute, 1.0)
+
+            if simple_g.has_edge(u, v):
+                if w < simple_g[u][v].get("weight", float("inf")):
+                    simple_g[u][v]["weight"] = w
+                    simple_g[u][v]["length_km"] = w
+            else:
+                simple_g.add_edge(u, v, weight=w, length_km=w)
+
+        return simple_g
+
     def find_k_shortest_paths(self, origin_id: str, destination_id: str, k: int = 3, weight_type: str = "travel_time") -> List[List[str]]:
         """Find k alternative routes between two nodes."""
         try:

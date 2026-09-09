@@ -1,7 +1,7 @@
 """Simulation schemas."""
 from typing import List, Optional, Any, Dict
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class SimulationControl(BaseModel):
     action: str  # start, stop, pause, resume, accelerate, step, reset
@@ -24,20 +24,20 @@ class SimulationStatusResponse(BaseModel):
     punctuality_percentage: float
     total_energy_kwh: float
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ScenarioCreate(BaseModel):
-    id: str
     name: str
-    description: Optional[str] = None
-    scenario_type: str  # TRACK_CLOSURE, TRAIN_DELAY, SIGNAL_FAILURE, PASSENGER_SURGE, WEATHER
-    parameters: Dict[str, Any]
+    scenario_type: str  # TRACK_CLOSURE, TRAIN_DELAY, SIGNAL_FAILURE, PASSENGER_SURGE, WEATHER, SPEED_RESTRICTION
+    description: Optional[str] = "Custom dispatcher disruption scenario"
+    parameters: Dict[str, Any] = {}
 
 class ScenarioComparisonResponse(BaseModel):
     scenario_id: str
     scenario_name: str
+    scenario_type: Optional[str] = None
     baseline: Dict[str, Any]
+    heuristic: Optional[Dict[str, Any]] = None
     optimized: Dict[str, Any]
     delay_reduction_percentage: Optional[float] = 0.0
     conflicts_avoided_percentage: Optional[float] = 0.0

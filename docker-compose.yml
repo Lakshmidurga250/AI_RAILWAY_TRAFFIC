@@ -28,6 +28,33 @@ services:
       - ./data:/app/data
       - ./ai/registry/models:/app/ai/registry/models
 
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: railway_ai_frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    container_name: railway_ai_worker
+    restart: always
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql://railway_user:railway_secure_pass_2026@postgres:5432/railway_traffic
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   postgres:
     image: postgres:16-alpine
     container_name: railway_postgres
@@ -78,6 +105,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafanadata:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
 
 volumes:
   pgdata:

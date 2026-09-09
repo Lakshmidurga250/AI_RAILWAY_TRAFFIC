@@ -1,17 +1,18 @@
-name: Railway AI Continuous Integration
+name: Railway AI Continuous Integration & Deployment
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
-  test:
+  # Pull Request Checks: Linting, Formatting, Backend Tests, Frontend Build
+  pr-validation:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Set up Python 3.12
       uses: actions/setup-python@v5
@@ -19,19 +20,83 @@ jobs:
         python-version: "3.12"
         cache: "pip"
 
-    - name: Install dependencies
+    - name: Install Python Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest httpx
+        pip install pytest httpx flake8 black
 
-    - name: Run Pytest Suite
+    - name: Code Quality & Lint Checks
+      run: |
+        flake8 ai/ backend/ optimization/ simulation/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
+        black --check ai/ backend/ optimization/ simulation/ --diff || true
+
+    - name: Run Pytest Test Suite
       run: |
         pytest tests/ -v --junitxml=test-results/results.xml
+
+    - name: Set up Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache-dependency-path: frontend/package.json
+
+    - name: Frontend Build Verification
+      run: |
+        cd frontend
+        npm install
+        npm run build
 
     - name: Upload Test Results
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-results
+        name: pr-test-results
         path: test-results/
+
+  # Main Branch: Security Audit, Docker Build & Container Artifact Verification
+  main-pipeline:
+    needs: pr-validation
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Security Vulnerability Scan
+      run: |
+        python -m pip install --upgrade pip
+        pip install pip-audit
+        pip-audit --desc on || true
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Backend Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile.backend
+        push: false
+        tags: railway-ai/backend:latest
+
+    - name: Build Worker Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile.worker
+        push: false
+        tags: railway-ai/worker:latest
+
+    - name: Build Frontend Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile.frontend
+        push: false
+        tags: railway-ai/frontend:latest

@@ -1,7 +1,8 @@
-"""Data Ingestion Engine: CSV, JSON, Telemetry stream normalization."""
 import json
+import io
+import xml.etree.ElementTree as ET
 import pandas as pd
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Tuple, Optional
 from datetime import datetime, timezone
 from ai.data.quality import DataQualityChecker
 
@@ -87,3 +88,87 @@ class DataIngestionService:
             errors=[]
         )
         return cleaned_df, result
+
+    @classmethod
+    def ingest_timetable_xml(cls, xml_content: str) -> Tuple[List[Dict[str, Any]], IngestionResult]:
+        """Parse and validate XML formatted railway timetable schedules."""
+        try:
+            root = ET.fromstring(xml_content)
+        except Exception as e:
+            res = IngestionResult(0, 0, 0, 0.0, [f"XML Syntax Error: {str(e)}"])
+            return [], res
+
+        services = []
+        errors = []
+        total_items = 0
+
+        # Support both <timetable><service> and <railml><trainSchedule> structures
+        train_elements = root.findall(".//service") or root.findall(".//train") or root.findall(".//trainSchedule")
+        total_items = len(train_elements)
+
+        for elem in train_elements:
+            train_id = elem.get("id") or elem.findtext("id") or elem.findtext("train_id")
+            train_num = elem.get("number") or elem.findtext("number") or elem.findtext("train_number") or train_id
+            train_type = elem.get("type") or elem.findtext("type") or "INTERCITY"
+            prio_str = elem.get("priority") or elem.findtext("priority") or "5"
+            try:
+                priority = int(prio_str)
+            except ValueError:
+                priority = 5
+
+            stops = []
+            stop_nodes = elem.findall(".//stop") or elem.findall(".//station")
+            for idx, st in enumerate(stop_nodes, start=1):
+                stn_id = st.get("station_id") or st.get("id") or st.text
+                arr = st.get("arrival") or st.get("scheduled_arrival")
+                dep = st.get("departure") or st.get("scheduled_departure")
+                platform = st.get("platform") or f"{stn_id}_P1"
+                dwell_str = st.get("dwell") or "120"
+                try:
+                    dwell = int(dwell_str)
+                except ValueError:
+                    dwell = 120
+
+                if stn_id:
+                    stops.append({
+                        "stop_sequence": idx,
+                        "station_id": stn_id,
+                        "platform_id": platform,
+                        "scheduled_arrival": arr,
+                        "scheduled_departure": dep,
+                        "dwell_seconds": dwell
+                    })
+
+            if train_id and stops:
+                services.append({
+                    "train_id": train_id,
+                    "train_number": train_num,
+                    "train_type": train_type,
+                    "priority": priority,
+                    "stops": stops
+                })
+            else:
+                errors.append(f"Train element missing ID or stops: {ET.tostring(elem, encoding='unicode')[:80]}")
+
+        valid_count = len(services)
+        rejected = total_items - valid_count
+        dq_score = round((valid_count / max(1, total_items)) * 100.0, 2)
+
+        res = IngestionResult(
+            total_rows=total_items,
+            processed_rows=valid_count,
+            rejected_rows=rejected,
+            dq_score=dq_score,
+            errors=errors
+        )
+        return services, res
+
+    @classmethod
+    def ingest_csv_str(cls, csv_text: str) -> Tuple[pd.DataFrame, IngestionResult]:
+        """Ingest raw CSV string representation."""
+        try:
+            df = pd.read_csv(io.StringIO(csv_text))
+            return cls.ingest_csv_dataframe(df)
+        except Exception as e:
+            res = IngestionResult(0, 0, 0, 0.0, [f"CSV Read Error: {str(e)}"])
+            return pd.DataFrame(), res
