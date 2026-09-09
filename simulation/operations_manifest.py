@@ -16,3 +16,4 @@
 # Feature PR #16: Add automatic flank protection derail point enforcement (Module: feat/flank-protection-derailers)
 # Feature PR #17: Configure approach locking 120s timer safety circuits (Module: feat/approach-locking-timers)
 # Feature PR #18: Implement 180m signal overlap track circuit validation (Module: feat/overlap-track-circuits)
+# Feature PR #19: Add calling-on subsidiary signal interlocking matrices (Module: feat/calling-on-signal-aspects)
