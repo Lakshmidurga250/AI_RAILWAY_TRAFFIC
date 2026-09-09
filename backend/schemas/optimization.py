@@ -25,7 +25,7 @@ class RouteOptimizationResponse(BaseModel):
     train_id: str
     algorithm: str
     optimal_route: RouteOption
-    alternative_routes: List[RouteOption]
+    alternative_routes: List[RouteOption] = []
     execution_time_ms: float
     explanation: str
 
@@ -74,3 +74,22 @@ class EnergyOptimizationResponse(BaseModel):
     co2_reduction_kg: float
     speed_profile: List[Dict[str, float]]
     explanation: str
+
+class OptimizationRunResponse(BaseModel):
+    id: str
+    optimization_type: str
+    algorithm: str
+    status: str
+    execution_time_ms: float
+    baseline_delay_minutes: float
+    optimized_delay_minutes: float
+    delay_reduction_percentage: float
+    baseline_energy_kwh: float
+    optimized_energy_kwh: float
+    energy_savings_percentage: float
+    conflicts_resolved: int
+    throughput_increase_percentage: float
+    input_parameters: Optional[Dict[str, Any]] = None
+    explanation: Optional[str] = None
+    created_at: datetime
+
