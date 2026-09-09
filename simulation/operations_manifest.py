@@ -71,6 +71,7 @@
 # Feature PR #62: Seed default roles, permissions, and operator credentials (feat/database-rbac-security-seed)
 # Feature PR #63: Enforce 24-hour cryptographic JWT session validity (feat/security-token-jwt-expiration)
 # Feature PR #75: Model Mumbai CSMT suburban & long-distance throat (Module: feat/station-mumbai-csmt-heritage-yard)
+<<<<<<< HEAD
 # Feature PR #65: Add authoritative package-lock.json dependency graph (feat/lockfile-npm-package-freeze)
 # Feature PR #77: Model Secunderabad junction 10-track bypass layout (Module: feat/station-secunderabad-sc-hub)
 # Feature PR #78: Model Vijayawada Krishna river bridge bottlenecks (Module: feat/station-vijayawada-bypass-junction)
@@ -90,3 +91,8 @@
 # Feature PR #74: Model Howrah 23-platform dual-system terminal complex (feat/station-howrah-terminal-complex)
 # Feature PR #75: Model Mumbai CSMT suburban & long-distance throat (feat/station-mumbai-csmt-heritage-yard)
 # Feature PR #76: Model Chennai Central Basin Bridge interlocking junction (feat/station-chennai-central-approaches)
+=======
+# Feature PR #64: Remove sensitive .env tracking and enforce example.env (feat/security-env-sanitize-secrets)
+# Feature PR #76: Model Chennai Central Basin Bridge interlocking junction (Module: feat/station-chennai-central-approaches)
+>>>>>>> feat/station-chennai-central-approaches
+# Feature PR #77: Model Secunderabad junction 10-track bypass layout (feat/station-secunderabad-sc-hub)
