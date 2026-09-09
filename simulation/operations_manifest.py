@@ -25,3 +25,4 @@
 # Feature PR #25: Enforce shunting speed limits and guard escort clauses (Module: feat/gsr-shunting-safety-invariants)
 # Feature PR #26: Add interlocked level crossing gate safety verifications (Module: feat/gsr-level-crossing-interlocking)
 # Feature PR #27: Add WAP-7 6000HP locomotive traction motor telemetry (Module: feat/telemetry-wap7-traction-logs)
+# Feature PR #28: Record WAG-12 12000HP heavy-haul electric telemetry (Module: feat/telemetry-wag12-twin-electric)
