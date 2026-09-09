@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  # 1. Backend API & Real-Time Simulation Engine
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: railway-ai-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=AI Railway Traffic Optimization System
+      - APP_ENV=production
+      - DEBUG=False
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DATABASE_URL=postgresql://railway_admin:railway_secure_pass_2026@postgres:5432/railway_traffic
+      - REDIS_URL=redis://redis:6379/0
+      - ENABLE_METRICS=True
+      - SECRET_KEY=railway-production-master-secret-key-2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - railway-net
+
+  # 2. Asynchronous Optimization & ML Worker
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    container_name: railway-ai-worker
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://railway_admin:railway_secure_pass_2026@postgres:5432/railway_traffic
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - railway-net
+
+  # 3. Frontend Web Control Center (React/Vite Production Distribution)
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: railway-ai-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - railway-net
+
+  # 4. PostgreSQL Timescale-Compatible Relational Store
+  postgres:
+    image: postgres:16-alpine
+    container_name: railway-ai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: railway_admin
+      POSTGRES_PASSWORD: railway_secure_pass_2026
+      POSTGRES_DB: railway_traffic
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U railway_admin -d railway_traffic"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - railway-net
+
+  # 5. Redis Cache & Event Broker
+  redis:
+    image: redis:7-alpine
+    container_name: railway-ai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - railway-net
+
+  # 6. Prometheus Metrics Collector
+  prometheus:
+    image: prom/prometheus:v2.50.0
+    container_name: railway-ai-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - railway-net
+
+  # 7. Grafana Metrics & Operational Dashboard
+  grafana:
+    image: grafana/grafana:10.3.3
+    container_name: railway-ai-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - railway-net
+
+volumes:
+  postgres_data:
+  grafana_data:
+
+networks:
+  railway-net:
+    driver: bridge

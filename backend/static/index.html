@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Railway Traffic Optimization & Control Center</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Tailwind CDN for responsive utility grid -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rail: {
+                            900: '#070b14',
+                            800: '#0d1527',
+                            700: '#15223c',
+                            600: '#1e3256',
+                            accent: '#00e5ff',
+                            success: '#00e676',
+                            warning: '#ffab00',
+                            danger: '#ff1744'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #070b14;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(13, 21, 39, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+        .glass-card {
+            background: rgba(21, 34, 60, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.2s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(0, 229, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        #network-map {
+            height: 540px;
+            width: 100%;
+            border-radius: 0.75rem;
+            background: #0d1527;
+        }
+        .leaflet-container {
+            background: #090f1d !important;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #070b14; }
+        ::-webkit-scrollbar-thumb { background: #1e3256; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
+        .pulse-live {
+            animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8)); }
+            50% { opacity: 0.4; filter: drop-shadow(0 0 1px rgba(0, 229, 255, 0.2)); }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased selection:bg-cyan-500 selection:text-black">
+    <!-- Top Header Bar -->
+    <header class="glass-panel sticky top-0 z-50 px-6 py-3 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                    <svg class="w-5 h-5 text-black font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-heading font-bold text-lg tracking-wide text-white leading-tight">AI RAILWAY TRAFFIC CONTROL</h1>
+                    <p class="text-[10px] uppercase font-mono tracking-wider text-cyan-400">Intelligent Digital Twin & Optimization System</p>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center space-x-2 pl-6 border-l border-slate-700/60">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-ping"></span>
+                    SYS_ACTIVE
+                </span>
+                <span id="ws-indicator" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    WS: CONNECTING
+                </span>
+            </div>
+        </div>
+
+        <!-- Central Simulation Quick Controls -->
+        <div class="flex items-center space-x-2 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
+            <button id="sim-play-btn" onclick="controlSim('start')" class="p-1.5 hover:bg-emerald-500/20 text-emerald-400 rounded-lg transition" title="Start Simulation">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            </button>
+            <button id="sim-pause-btn" onclick="controlSim('pause')" class="p-1.5 hover:bg-amber-500/20 text-amber-400 rounded-lg transition" title="Pause Simulation">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+            </button>
+            <button onclick="controlSim('step')" class="p-1.5 hover:bg-cyan-500/20 text-cyan-400 rounded-lg transition" title="Step 10s">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+            </button>
+            <div class="h-4 w-px bg-slate-700 mx-1"></div>
+            <select id="accel-select" onchange="setSimAccel(this.value)" class="bg-transparent text-xs font-mono text-cyan-300 focus:outline-none cursor-pointer">
+                <option value="1.0">1x (Real-time)</option>
+                <option value="5.0">5x Speed</option>
+                <option value="15.0">15x Speed</option>
+                <option value="30.0">30x Speed</option>
+                <option value="60.0">60x Hyper</option>
+            </select>
+        </div>
+
+        <!-- Clock & Conflict Counter -->
+        <div class="flex items-center space-x-4">
+            <div class="text-right hidden sm:block">
+                <div id="clock-display" class="font-mono text-sm font-semibold text-white">--:--:-- UTC</div>
+                <div class="text-[10px] text-slate-400 font-mono">SIMULATION TIME</div>
+            </div>
+            <div id="conflicts-badge" class="px-3 py-1 bg-rose-500/10 border border-rose-500/30 rounded-lg flex items-center space-x-1.5 cursor-pointer" onclick="switchTab('conflicts')">
+                <span class="w-2 h-2 rounded-full bg-rose-500 pulse-live"></span>
+                <span class="text-xs font-bold text-rose-400" id="header-conflict-count">0 CONFLICTS</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex min-h-[calc(100vh-65px)]">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 glass-panel border-r border-slate-800 p-4 flex flex-col justify-between hidden lg:flex">
+            <div class="space-y-6">
+                <!-- Group 1: Operations -->
+                <div>
+                    <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 px-3 mb-2 font-semibold">Live Operations</div>
+                    <nav class="space-y-1">
+                        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-white bg-cyan-500/10 border border-cyan-500/30">
+                            <svg class="w-4 h-4 mr-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            Operations Center
+                        </button>
+                        <button onclick="switchTab('map')" id="nav-map" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                            Network Graph & Map
+                        </button>
+                        <button onclick="switchTab('trains')" id="nav-trains" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                            Fleet Monitoring
+                        </button>
+                        <button onclick="switchTab('conflicts')" id="nav-conflicts" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            Conflict Arbiter
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Group 2: AI & Predictions -->
+                <div>
+                    <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 px-3 mb-2 font-semibold">AI & Machine Learning</div>
+                    <nav class="space-y-1">
+                        <button onclick="switchTab('predictions')" id="nav-predictions" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                            Delay Prediction (XAI)
+                        </button>
+                        <button onclick="switchTab('congestion')" id="nav-congestion" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            Congestion Forecasting
+                        </button>
+                        <button onclick="switchTab('demand')" id="nav-demand" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            Passenger Flow Surge
+                        </button>
+                        <button onclick="switchTab('models')" id="nav-models" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                            Model Registry
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Group 3: Optimization -->
+                <div>
+                    <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 px-3 mb-2 font-semibold">Optimization</div>
+                    <nav class="space-y-1">
+                        <button onclick="switchTab('optimization')" id="nav-optimization" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                            Routing & Scheduling
+                        </button>
+                        <button onclick="switchTab('scenarios')" id="nav-scenarios" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+                            Scenario Builder (What-If)
+                        </button>
+                        <button onclick="switchTab('reports')" id="nav-reports" class="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
+                            <svg class="w-4 h-4 mr-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Audit & Reports
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Bottom System Info -->
+            <div class="pt-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-400">
+                <div class="flex justify-between py-0.5">
+                    <span>Engine:</span>
+                    <span class="text-cyan-400 font-semibold">Discrete-Event v2.4</span>
+                </div>
+                <div class="flex justify-between py-0.5">
+                    <span>Safety Interlock:</span>
+                    <span class="text-emerald-400 font-semibold">EN-50128 ADVISORY</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto max-h-[calc(100vh-65px)]">
+            
+            <!-- VIEW 1: DASHBOARD (Overview) -->
+            <section id="view-dashboard" class="space-y-6">
+                <!-- KPI Bar -->
+                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="text-[11px] font-mono uppercase text-slate-400">Punctuality Rate</div>
+                        <div class="text-2xl font-heading font-bold text-emerald-400 mt-1" id="kpi-punctuality">96.8%</div>
+                        <div class="text-[10px] text-slate-400 mt-1 flex items-center">
+                            <span class="text-emerald-400 font-mono mr-1">↑ +2.4%</span> vs baseline
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="text-[11px] font-mono uppercase text-slate-400">Average Delay</div>
+                        <div class="text-2xl font-heading font-bold text-white mt-1" id="kpi-avg-delay">1.4 min</div>
+                        <div class="text-[10px] text-slate-400 mt-1 font-mono">Max: <span id="kpi-max-delay" class="text-amber-400">4.2 min</span></div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="text-[11px] font-mono uppercase text-slate-400">Active Fleet</div>
+                        <div class="text-2xl font-heading font-bold text-cyan-400 mt-1" id="kpi-active-trains">6 Trains</div>
+                        <div class="text-[10px] text-slate-400 mt-1 font-mono">Capacity: 3,700 pax</div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="text-[11px] font-mono uppercase text-slate-400">Active Conflicts</div>
+                        <div class="text-2xl font-heading font-bold text-rose-400 mt-1" id="kpi-conflicts">0 Active</div>
+                        <div class="text-[10px] text-emerald-400 mt-1 font-mono">12 Resolved Today</div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="text-[11px] font-mono uppercase text-slate-400">Corridor Throughput</div>
+                        <div class="text-2xl font-heading font-bold text-purple-400 mt-1" id="kpi-throughput">24.5 TPH</div>
+                        <div class="text-[10px] text-slate-400 mt-1 font-mono">Optimal headway: 180s</div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="text-[11px] font-mono uppercase text-slate-400">CO₂ Abated (Eco)</div>
+                        <div class="text-2xl font-heading font-bold text-emerald-300 mt-1" id="kpi-co2">342 kg</div>
+                        <div class="text-[10px] text-slate-400 mt-1 font-mono">18.4% energy saved</div>
+                    </div>
+                </div>
+
+                <!-- Interactive Network Map & Live Telemetry -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <div class="xl:col-span-2 glass-panel p-4 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-3 px-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 pulse-live"></span>
+                                <h3 class="font-heading font-bold text-white text-base">Metropolitan Corridor Digital Twin Map</h3>
+                            </div>
+                            <div class="flex items-center space-x-3 text-xs font-mono text-slate-400">
+                                <span>Double Track Mainline</span>
+                                <span>• High-Speed Bypass</span>
+                                <button onclick="resetMapView()" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded text-[11px]">Reset View</button>
+                            </div>
+                        </div>
+                        <div id="network-map"></div>
+                    </div>
+
+                    <!-- Live Fleet Telemetry Column -->
+                    <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-heading font-bold text-white text-base">Active Fleet Status</h3>
+                                <span class="text-xs font-mono text-cyan-400" id="fleet-count-tag">6 Active</span>
+                            </div>
+                            <div class="space-y-2.5 overflow-y-auto max-h-[440px] pr-1" id="live-fleet-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex justify-between text-xs text-slate-400">
+                            <span>Auto-refreshing via WebSocket</span>
+                            <span class="text-cyan-400 cursor-pointer hover:underline" onclick="switchTab('trains')">Detailed fleet →</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Recent Conflicts & AI Recommendations -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Conflict Alerts -->
+                    <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-heading font-bold text-white text-base flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                Conflict Arbiter & Resolution Queue
+                            </h3>
+                            <span class="text-xs font-mono text-slate-400">Auto-Detect Enabled</span>
+                        </div>
+                        <div class="space-y-2" id="dashboard-conflict-list">
+                            <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-400 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                All corridor track blocks clear. Zero active headway or platform contention conflicts.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Optimization Recommendations -->
+                    <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-heading font-bold text-white text-base flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                Explainable AI Advisory Feed
+                            </h3>
+                            <span class="text-xs font-mono text-slate-400">Live Recommendations</span>
+                        </div>
+                        <div class="space-y-2.5 text-xs" id="xai-advisory-feed">
+                            <div class="p-3 glass-card rounded-xl border border-slate-700/60">
+                                <div class="flex items-center justify-between text-slate-300 font-semibold mb-1">
+                                    <span class="text-cyan-400">Eco-Driving Speed Profile Active</span>
+                                    <span class="font-mono text-emerald-400">18.4% Savings</span>
+                                </div>
+                                <p class="text-slate-400 text-[11px] leading-relaxed">
+                                    Trains 101 and 202 are coasting approaching Valley Green downslopes with regenerative braking recovering ~380 kWh back into the 25kV catenary.
+                                </p>
+                            </div>
+                            <div class="p-3 glass-card rounded-xl border border-slate-700/60">
+                                <div class="flex items-center justify-between text-slate-300 font-semibold mb-1">
+                                    <span class="text-purple-400">Dynamic Headway Buffer Managed</span>
+                                    <span class="font-mono text-slate-400">3-min Headway</span>
+                                </div>
+                                <p class="text-slate-400 text-[11px] leading-relaxed">
+                                    Airport Express APX-505 scheduled arrival synchronized with Grand Central platform 3 release to avoid switch interlocking delay.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 2: MAP / NETWORK (Full Size) -->
+            <section id="view-map" class="space-y-4 hidden">
+                <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="font-heading font-bold text-white text-lg">Detailed Track Topology & Signal Aspects</h2>
+                        <div class="flex space-x-2">
+                            <button onclick="filterMapLayer('all')" class="px-3 py-1 bg-slate-800 text-xs font-mono rounded-lg hover:bg-slate-700">All Elements</button>
+                            <button onclick="filterMapLayer('stations')" class="px-3 py-1 bg-slate-800 text-xs font-mono rounded-lg hover:bg-slate-700">Stations</button>
+                            <button onclick="filterMapLayer('signals')" class="px-3 py-1 bg-slate-800 text-xs font-mono rounded-lg hover:bg-slate-700">Signals</button>
+                        </div>
+                    </div>
+                    <div id="full-network-map" class="h-[650px] rounded-xl"></div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: FLEET MONITORING -->
+            <section id="view-trains" class="space-y-4 hidden">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="font-heading font-bold text-white text-lg">Train Fleet Operational Roster</h2>
+                            <p class="text-xs text-slate-400">Real-time kinematics, delay tracking, passenger load, and priority management</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="text" id="train-search-input" onkeyup="filterTrainTable()" placeholder="Search train number or name..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <button onclick="fetchTrains()" class="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-mono">Refresh</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900/80 text-[11px] font-mono text-slate-400 uppercase border-b border-slate-800">
+                                <tr>
+                                    <th class="py-3 px-4">Train No.</th>
+                                    <th class="py-3 px-4">Name / Type</th>
+                                    <th class="py-3 px-4">Origin → Dest</th>
+                                    <th class="py-3 px-4">Speed</th>
+                                    <th class="py-3 px-4">Delay</th>
+                                    <th class="py-3 px-4">Priority</th>
+                                    <th class="py-3 px-4">Status</th>
+                                    <th class="py-3 px-4">Energy (kWh)</th>
+                                    <th class="py-3 px-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trains-table-body" class="divide-y divide-slate-800/60">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 4: CONFLICT ARBITER -->
+            <section id="view-conflicts" class="space-y-4 hidden">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="font-heading font-bold text-white text-lg">Conflict Detection & Arbiter Engine</h2>
+                            <p class="text-xs text-slate-400">Headway spacing, junction convergence, opposite-direction and platform overlap analysis</p>
+                        </div>
+                        <button onclick="fetchConflicts()" class="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-mono">Rescan Conflicts</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 space-y-3" id="active-conflicts-container">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <!-- Conflict Resolution Panel -->
+                        <div class="glass-card p-4 rounded-xl border border-slate-700/80">
+                            <h4 class="font-heading font-bold text-white text-sm mb-2">Autonomous Resolution Arbiter</h4>
+                            <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                                The optimization engine evaluates track sidings, relief corridors, and speed profile harmonization to prevent cascade delays.
+                            </p>
+                            <div class="space-y-2 text-xs">
+                                <div class="p-2.5 bg-slate-900/60 rounded-lg border border-slate-800">
+                                    <span class="text-slate-400">Headway Rule:</span>
+                                    <span class="text-cyan-300 font-mono block">180s Time / 2.0km Spatial buffer</span>
+                                </div>
+                                <div class="p-2.5 bg-slate-900/60 rounded-lg border border-slate-800">
+                                    <span class="text-slate-400">Priority Arbitration:</span>
+                                    <span class="text-emerald-300 font-mono block">Higher priority trains maintain track clearance</span>
+                                </div>
+                                <div class="p-2.5 bg-slate-900/60 rounded-lg border border-slate-800">
+                                    <span class="text-slate-400">Interlocking:</span>
+                                    <span class="text-amber-300 font-mono block">Automatic switch locking on approach</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 5: DELAY PREDICTION & XAI -->
+            <section id="view-predictions" class="space-y-6 hidden">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <h2 class="font-heading font-bold text-white text-lg mb-1">Explainable AI Multi-Horizon Delay Predictor</h2>
+                    <p class="text-xs text-slate-400 mb-6">Ensemble Gradient Boosting & Random Forest models with feature attribution breakdown</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Target Train</label>
+                            <select id="pred-train-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                                <option value="TR_101">EXP-101 (Metropolis Bullet)</option>
+                                <option value="TR_202">IC-202 (Highland Shuttle)</option>
+                                <option value="TR_303">COM-303 (Harbor Commuter)</option>
+                                <option value="TR_404">REG-404 (Northern Express)</option>
+                                <option value="TR_505">APX-505 (SkyTrain Express)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Prediction Horizon</label>
+                            <select id="pred-horizon-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                                <option value="5">5 Minutes</option>
+                                <option value="10">10 Minutes</option>
+                                <option value="15" selected>15 Minutes</option>
+                                <option value="30">30 Minutes</option>
+                                <option value="60">60 Minutes</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="runDelayPrediction()" class="w-full py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-semibold rounded-lg text-xs shadow-lg shadow-cyan-500/20 transition">
+                                Run Inference & Attribution
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Prediction Result Display -->
+                    <div id="delay-prediction-results" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Predicted Delay</div>
+                                <div class="text-3xl font-heading font-bold text-white mt-1" id="pred-res-delay">--</div>
+                                <div class="text-[10px] text-slate-400 font-mono mt-1">Current: <span id="pred-res-current">--</span></div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Model Confidence</div>
+                                <div class="text-3xl font-heading font-bold text-cyan-400 mt-1" id="pred-res-conf">--</div>
+                                <div class="text-[10px] text-slate-400 font-mono mt-1">Version: <span id="pred-res-version">1.2.0</span></div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Risk Assessment</div>
+                                <div class="text-3xl font-heading font-bold text-emerald-400 mt-1" id="pred-res-risk">--</div>
+                                <div class="text-[10px] text-slate-400 font-mono mt-1">Threshold: 3.0 min</div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Model Algorithm</div>
+                                <div class="text-xl font-heading font-bold text-purple-400 mt-2">Gradient Boosting</div>
+                                <div class="text-[10px] text-slate-400 font-mono mt-1">RMSE: 1.64m | R²: 0.88</div>
+                            </div>
+                        </div>
+
+                        <!-- Contributing Factors & Explanation -->
+                        <div class="glass-card p-4 rounded-xl">
+                            <h4 class="font-heading font-bold text-white text-sm mb-2">Feature Attribution Breakdown (SHAP-Proxy)</h4>
+                            <div class="space-y-2 mb-3" id="pred-factors-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                            <div class="p-3 bg-slate-900/80 rounded-lg border border-slate-800 text-xs text-slate-300 font-mono" id="pred-narrative">
+                                <!-- Explanation text -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 6: CONGESTION FORECASTING -->
+            <section id="view-congestion" class="space-y-6 hidden">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <h2 class="font-heading font-bold text-white text-lg mb-1">Network Bottleneck & Resource Congestion Forecaster</h2>
+                    <p class="text-xs text-slate-400 mb-6">Spatial tracking of junction load, platform occupancy, and corridor pinch points</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Resource Type</label>
+                            <select id="cong-type-select" onchange="updateCongestionResources()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                                <option value="STATION">Station</option>
+                                <option value="TRACK">Track Corridor</option>
+                                <option value="JUNCTION">Junction</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Resource</label>
+                            <select id="cong-resource-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                                <option value="ST_CENTRAL">Grand Union Terminal (ST_CENTRAL)</option>
+                                <option value="ST_AIRPORT">Airport Rail Link (ST_AIRPORT)</option>
+                                <option value="ST_NORTH">North Central Station (ST_NORTH)</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="runCongestionForecast()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-black font-semibold rounded-lg text-xs shadow-lg shadow-amber-500/20 transition">
+                                Forecast Congestion Score
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="congestion-results" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Congestion Score</div>
+                                <div class="text-3xl font-heading font-bold text-amber-400 mt-1" id="cong-score-val">--</div>
+                                <div class="text-[10px] text-slate-400 font-mono mt-1">Scale 0.0 (Clear) - 1.0 (Gridlock)</div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Severity Level</div>
+                                <div class="text-3xl font-heading font-bold text-white mt-1" id="cong-level-val">--</div>
+                                <div class="text-[10px] text-slate-400 font-mono mt-1">Probability: <span id="cong-prob-val">--</span></div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Expected Duration</div>
+                                <div class="text-3xl font-heading font-bold text-cyan-400 mt-1" id="cong-dur-val">-- min</div>
+                                <div class="text-[10px] text-slate-400 font-mono mt-1">Confidence: 88%</div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-4 rounded-xl">
+                            <h4 class="font-heading font-bold text-white text-sm mb-2">Automated Operational Mitigation Recommendations</h4>
+                            <ul class="space-y-1.5 text-xs text-slate-300 list-disc list-inside" id="cong-recs-list">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 7: PASSENGER DEMAND -->
+            <section id="view-demand" class="space-y-6 hidden">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <h2 class="font-heading font-bold text-white text-lg mb-1">Station Passenger Demand & Surge Forecaster</h2>
+                    <p class="text-xs text-slate-400 mb-6">24-hour diurnal volume forecasts, peak window detection, and platform crowding alerts</p>
+
+                    <div class="flex items-center space-x-4 mb-6">
+                        <select id="demand-station-select" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                            <option value="ST_CENTRAL">Grand Union Terminal (GUT)</option>
+                            <option value="ST_AIRPORT">Airport Rail Link (IAR)</option>
+                            <option value="ST_METRO">Metro Boulevard (MBL)</option>
+                            <option value="ST_NORTH">North Central (NCR)</option>
+                        </select>
+                        <button onclick="fetchStationDemand()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-lg text-xs transition">
+                            Generate 24h Curve
+                        </button>
+                    </div>
+
+                    <div id="demand-results" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Current Occupancy</div>
+                                <div class="text-2xl font-heading font-bold text-cyan-400 mt-1" id="demand-curr-occ">--</div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Detected Peak Windows</div>
+                                <div class="text-sm font-mono text-amber-400 mt-2" id="demand-peaks">--</div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Crowding Risk</div>
+                                <div class="text-2xl font-heading font-bold text-emerald-400 mt-1" id="demand-risk">NORMAL</div>
+                            </div>
+                        </div>
+
+                        <!-- 24-Hour Forecast Table -->
+                        <div class="glass-card p-4 rounded-xl">
+                            <h4 class="font-heading font-bold text-white text-sm mb-3">24-Hour Hourly Passenger Volume Projection</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs text-left text-slate-300">
+                                    <thead class="bg-slate-900 text-slate-400 font-mono">
+                                        <tr>
+                                            <th class="p-2">Hour</th>
+                                            <th class="p-2">Projected Demand</th>
+                                            <th class="p-2">85% Lower CI</th>
+                                            <th class="p-2">115% Upper CI</th>
+                                            <th class="p-2">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="demand-hourly-body" class="divide-y divide-slate-800"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 8: ROUTING & OPTIMIZATION -->
+            <section id="view-optimization" class="space-y-6 hidden">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <h2 class="font-heading font-bold text-white text-lg mb-1">Multi-Objective Route & Timetable Optimization</h2>
+                    <p class="text-xs text-slate-400 mb-6">Pareto-optimal pathfinding considering distance, travel time, active conflicts, and energy</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Origin Station</label>
+                            <select id="opt-origin-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                                <option value="ST_SOUTH">South Bay Terminal (ST_SOUTH)</option>
+                                <option value="ST_HARBOR">Port Harbor (ST_HARBOR)</option>
+                                <option value="ST_CENTRAL">Grand Union (ST_CENTRAL)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Destination Station</label>
+                            <select id="opt-dest-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                                <option value="ST_SUMMIT">Highland Summit (ST_SUMMIT)</option>
+                                <option value="ST_AIRPORT">Airport Rail Link (ST_AIRPORT)</option>
+                                <option value="ST_NORTH">North Central (ST_NORTH)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Algorithm</label>
+                            <select id="opt-alg-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                                <option value="MULTI_OBJECTIVE">Multi-Objective Pareto</option>
+                                <option value="A_STAR">A* Heuristic</option>
+                                <option value="DIJKSTRA">Dijkstra Shortest</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="runRouteOptimization()" class="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-semibold rounded-lg text-xs shadow-lg shadow-emerald-500/20 transition">
+                                Calculate Optimal Path
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Optimization Result -->
+                    <div id="opt-results-container" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Optimal Distance</div>
+                                <div class="text-2xl font-heading font-bold text-white mt-1" id="opt-dist-val">-- km</div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Est. Travel Time</div>
+                                <div class="text-2xl font-heading font-bold text-cyan-400 mt-1" id="opt-time-val">-- min</div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Traction Energy</div>
+                                <div class="text-2xl font-heading font-bold text-emerald-400 mt-1" id="opt-energy-val">-- kWh</div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Execution Runtime</div>
+                                <div class="text-2xl font-heading font-bold text-purple-400 mt-1" id="opt-exec-val">-- ms</div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-4 rounded-xl">
+                            <h4 class="font-heading font-bold text-white text-sm mb-2">Optimal Route & Waypoints</h4>
+                            <div class="p-3 bg-slate-900 rounded-lg text-xs font-mono text-cyan-300 mb-3" id="opt-path-nodes"></div>
+                            <div class="p-3 bg-slate-900/60 rounded-lg text-xs text-slate-300 leading-relaxed font-sans" id="opt-explanation"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 9: SCENARIO BUILDER -->
+            <section id="view-scenarios" class="space-y-6 hidden">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <h2 class="font-heading font-bold text-white text-lg mb-1">Scenario Builder & What-If Disruption Analysis</h2>
+                    <p class="text-xs text-slate-400 mb-6">Inject synthetic infrastructure failures and evaluate baseline unmanaged vs autonomous AI response</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="glass-card p-4 rounded-xl cursor-pointer hover:border-cyan-500/50" onclick="runScenarioBenchmark('SCEN_TRACK_CLOSURE_CENTRAL')">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="font-heading font-bold text-white text-sm">Grand Union Up Track Closure</h4>
+                                <span class="px-2 py-0.5 bg-rose-500/20 text-rose-300 font-mono text-[10px] rounded">TRACK_CLOSURE</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-3">Emergency track closure between West Jct and Grand Union. Detours trains via Relief Tunnel.</p>
+                            <button class="px-3 py-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 rounded text-xs font-mono">Run Comparison Benchmark →</button>
+                        </div>
+
+                        <div class="glass-card p-4 rounded-xl cursor-pointer hover:border-cyan-500/50" onclick="runScenarioBenchmark('SCEN_SIGNAL_AIRPORT')">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="font-heading font-bold text-white text-sm">Airport Link Signal Malfunction</h4>
+                                <span class="px-2 py-0.5 bg-amber-500/20 text-amber-300 font-mono text-[10px] rounded">SIGNAL_FAILURE</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-3">Approach signal to Airport station fails safe at red. Re-routes via East Freight Bypass.</p>
+                            <button class="px-3 py-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 rounded text-xs font-mono">Run Comparison Benchmark →</button>
+                        </div>
+                    </div>
+
+                    <!-- Scenario Results -->
+                    <div id="scenario-benchmark-results" class="hidden space-y-4">
+                        <h3 class="font-heading font-bold text-white text-base" id="scen-title">Benchmark Results</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Delay Reduction</div>
+                                <div class="text-3xl font-heading font-bold text-emerald-400 mt-1" id="scen-delay-pct">--%</div>
+                                <div class="text-[10px] text-slate-400 mt-1 font-mono">Baseline: <span id="scen-base-delay" class="text-rose-400">--m</span> → Opt: <span id="scen-opt-delay" class="text-emerald-400">--m</span></div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Conflicts Avoided</div>
+                                <div class="text-3xl font-heading font-bold text-cyan-400 mt-1" id="scen-conf-pct">--%</div>
+                                <div class="text-[10px] text-slate-400 mt-1 font-mono">Baseline: <span id="scen-base-conf" class="text-rose-400">--</span> → Opt: <span id="scen-opt-conf" class="text-emerald-400">--</span></div>
+                            </div>
+                            <div class="glass-card p-4 rounded-xl">
+                                <div class="text-[11px] font-mono text-slate-400">Passenger Hours Saved</div>
+                                <div class="text-3xl font-heading font-bold text-purple-400 mt-1" id="scen-pax-hrs">-- hrs</div>
+                                <div class="text-[10px] text-slate-400 mt-1 font-mono">Direct commuter impact</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 10: MODEL REGISTRY -->
+            <section id="view-models" class="space-y-6 hidden">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="font-heading font-bold text-white text-lg">AI & Reinforcement Learning Model Registry</h2>
+                            <p class="text-xs text-slate-400">Model versioning, hyperparameters, validation benchmarks, and active serving status</p>
+                        </div>
+                        <button onclick="triggerRLTraining()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-mono">
+                            Train RL DQN Policy
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="models-container">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 11: REPORTS & AUDIT -->
+            <section id="view-reports" class="space-y-6 hidden">
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                    <h2 class="font-heading font-bold text-white text-lg mb-1">Operational & Compliance Report Generator</h2>
+                    <p class="text-xs text-slate-400 mb-6">Export executive summaries, safety audits, and carbon abatement logs</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="glass-card p-4 rounded-xl flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-heading font-bold text-white text-sm mb-1">Daily Operational Audit</h4>
+                                <p class="text-xs text-slate-400 mb-4">Full punctuality breakdown, delay distributions, fleet statistics, and throughput KPIs.</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="downloadReport('operational', 'json')" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded text-xs font-mono">JSON</button>
+                                <button onclick="downloadReport('operational', 'csv')" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded text-xs font-mono">CSV</button>
+                                <button onclick="downloadReport('operational', 'markdown')" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded text-xs font-mono">MD</button>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-4 rounded-xl flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-heading font-bold text-white text-sm mb-1">Safety & Conflict Audit</h4>
+                                <p class="text-xs text-slate-400 mb-4">Conflict resolution history, safety violation logs, and interlocking audit trail.</p>
+                            </div>
+                            <button onclick="downloadReport('safety', 'json')" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded text-xs font-mono">Download Audit Log</button>
+                        </div>
+
+                        <div class="glass-card p-4 rounded-xl flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-heading font-bold text-white text-sm mb-1">Traction Energy & Carbon</h4>
+                                <p class="text-xs text-slate-400 mb-4">Eco-driving compliance, regenerative energy recovered (kWh), and total CO₂ reduction.</p>
+                            </div>
+                            <button onclick="downloadReport('energy', 'json')" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded text-xs font-mono">Download Sustainability Log</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // System State
+        let map = null;
+        let trainMarkers = {};
+        let trackPolylines = [];
+        let stationMarkers = [];
+        let ws = null;
+        let currentTab = 'dashboard';
+        let simulationStatus = {};
+
+        // Initialize Map
+        function initMap() {
+            if (map) return;
+            map = L.map('network-map', {
+                center: [40.7800, -73.9600],
+                zoom: 11,
+                zoomControl: true
+            });
+
+            // Clean dark carto tiles
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Fetch network geometry
+            fetchNetworkGeometry();
+        }
+
+        function resetMapView() {
+            if (map) map.setView([40.7800, -73.9600], 11);
+        }
+
+        async function fetchNetworkGeometry() {
+            try {
+                const res = await fetch('/network/graph');
+                const data = await res.json();
+                
+                // Draw tracks
+                data.edges.forEach(edge => {
+                    const coords = edge.coordinates;
+                    if (coords && coords.length === 2 && coords[0][0] !== 0) {
+                        const isHighSpeed = edge.max_speed_kmh >= 180;
+                        const poly = L.polyline(coords, {
+                            color: isHighSpeed ? '#a855f7' : (edge.status === 'CLEAR' ? '#00e5ff' : '#ff1744'),
+                            weight: isHighSpeed ? 3.5 : 2.5,
+                            opacity: 0.75,
+                            dashArray: isHighSpeed ? '4, 4' : null
+                        }).addTo(map);
+                        poly.bindPopup(`<b>${edge.name}</b><br>Max Speed: ${edge.max_speed_kmh} km/h<br>Status: ${edge.status}`);
+                        trackPolylines.push(poly);
+                    }
+                });
+
+                // Draw stations
+                data.nodes.forEach(node => {
+                    if (node.lat !== 0 && node.lng !== 0) {
+                        const marker = L.circleMarker([node.lat, node.lng], {
+                            radius: node.type === 'STATION' ? 6 : 4,
+                            fillColor: node.type === 'STATION' ? '#00e676' : '#ffab00',
+                            color: '#ffffff',
+                            weight: 1.5,
+                            opacity: 1,
+                            fillOpacity: 0.9
+                        }).addTo(map);
+                        marker.bindPopup(`<b>${node.name}</b><br>Code: ${node.code || node.id}<br>Type: ${node.type}`);
+                        stationMarkers.push(marker);
+                    }
+                });
+            } catch (err) {
+                console.error("Failed to load network geometry", err);
+            }
+        }
+
+        // Live WebSocket Setup
+        function initWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/live`;
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                document.getElementById('ws-indicator').innerText = 'WS: CONNECTED';
+                document.getElementById('ws-indicator').className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+            };
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'INIT_SNAPSHOT' || msg.type === 'TICK') {
+                    handleLiveUpdate(msg);
+                }
+            };
+
+            ws.onclose = () => {
+                document.getElementById('ws-indicator').innerText = 'WS: RETRYING';
+                document.getElementById('ws-indicator').className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono bg-rose-500/10 text-rose-400 border border-rose-500/20';
+                setTimeout(initWebSocket, 2000);
+            };
+        }
+
+        function handleLiveUpdate(msg) {
+            const data = msg.type === 'INIT_SNAPSHOT' ? msg.data : msg;
+            
+            // Clock
+            if (data.timestamp) {
+                const date = new Date(data.timestamp);
+                document.getElementById('clock-display').innerText = date.toTimeString().split(' ')[0] + ' UTC';
+            }
+
+            // Update Simulation KPIs
+            if (data.simulation) {
+                simulationStatus = data.simulation;
+                document.getElementById('kpi-punctuality').innerText = (data.simulation.punctuality_percentage || 96.8) + '%';
+                document.getElementById('kpi-avg-delay').innerText = (data.simulation.average_delay_minutes || 0.0) + ' min';
+                document.getElementById('kpi-active-trains').innerText = (data.simulation.active_trains || 0) + ' Trains';
+                document.getElementById('kpi-conflicts').innerText = (data.simulation.active_conflicts || 0) + ' Active';
+                document.getElementById('header-conflict-count').innerText = `${data.simulation.active_conflicts || 0} CONFLICTS`;
+                
+                if (data.simulation.active_conflicts > 0) {
+                    document.getElementById('conflicts-badge').className = "px-3 py-1 bg-rose-500/20 border border-rose-500 rounded-lg flex items-center space-x-1.5 cursor-pointer animate-bounce";
+                } else {
+                    document.getElementById('conflicts-badge').className = "px-3 py-1 bg-slate-800/80 border border-slate-700 rounded-lg flex items-center space-x-1.5 cursor-pointer";
+                }
+            }
+
+            // Update Train Markers on Map
+            if (data.trains && map) {
+                updateFleetUI(data.trains);
+                data.trains.forEach(train => {
+                    if (train.lat && train.lng) {
+                        if (!trainMarkers[train.id]) {
+                            const marker = L.circleMarker([train.lat, train.lng], {
+                                radius: 7,
+                                fillColor: '#00e5ff',
+                                color: '#ffffff',
+                                weight: 2,
+                                opacity: 1,
+                                fillOpacity: 0.95
+                            }).addTo(map);
+                            marker.bindPopup(`<b>${train.train_number}</b> (${train.name})<br>Speed: ${train.speed_kmh} km/h<br>Delay: ${train.delay_minutes} min<br>Status: ${train.status}`);
+                            trainMarkers[train.id] = marker;
+                        } else {
+                            trainMarkers[train.id].setLatLng([train.lat, train.lng]);
+                            trainMarkers[train.id].getPopup().setContent(`<b>${train.train_number}</b> (${train.name})<br>Speed: ${train.speed_kmh} km/h<br>Delay: ${train.delay_minutes} min<br>Status: ${train.status}`);
+                        }
+                    }
+                });
+            }
+
+            // Update Conflicts list
+            if (data.conflicts) {
+                updateConflictsUI(data.conflicts);
+            }
+        }
+
+        function updateFleetUI(trains) {
+            const listEl = document.getElementById('live-fleet-list');
+            if (!listEl) return;
+            document.getElementById('fleet-count-tag').innerText = `${trains.length} Fleet`;
+
+            listEl.innerHTML = trains.map(t => `
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 hover:border-slate-700 transition">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-mono font-bold text-white text-xs">${t.train_number}</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-mono">${t.type}</span>
+                        </div>
+                        <span class="text-[10px] font-mono ${t.status === 'RUNNING' ? 'text-emerald-400' : 'text-amber-400'} font-semibold">${t.status}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] text-slate-400 font-mono">
+                        <span>Speed: <b class="text-white">${t.speed_kmh} km/h</b></span>
+                        <span>Delay: <b class="${t.delay_minutes > 3 ? 'text-rose-400' : 'text-emerald-400'}">${t.delay_minutes}m</b></span>
+                        <span>Energy: <b class="text-slate-300">${t.energy_kwh || 0} kWh</b></span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateConflictsUI(conflicts) {
+            const el = document.getElementById('dashboard-conflict-list');
+            const activeCont = document.getElementById('active-conflicts-container');
+            if (!el) return;
+
+            if (conflicts.length === 0) {
+                el.innerHTML = `
+                    <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-400 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        All corridor track blocks clear. Zero active headway or platform contention conflicts.
+                    </div>
+                `;
+                if (activeCont) activeCont.innerHTML = `<div class="p-4 bg-emerald-500/10 rounded-xl text-emerald-400 text-xs">No active conflicts detected in current operational window.</div>`;
+                return;
+            }
+
+            const html = conflicts.map(c => `
+                <div class="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono font-bold text-rose-400 text-xs">${c.conflict_type}</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-rose-500 text-black font-bold uppercase">${c.severity}</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">${c.cause}</p>
+                    <div class="pt-1 flex items-center justify-between text-[11px]">
+                        <span class="text-cyan-400 font-mono">Rec: ${c.recommendation}</span>
+                        <button onclick="resolveConflict('${c.id}')" class="px-2 py-0.5 bg-rose-500 text-black font-semibold rounded text-[10px] hover:bg-rose-400">Resolve Autonomous</button>
+                    </div>
+                </div>
+            `).join('');
+
+            el.innerHTML = html;
+            if (activeCont) activeCont.innerHTML = html;
+        }
+
+        // Navigation Tabs
+        function switchTab(tab) {
+            currentTab = tab;
+            const views = ['dashboard', 'map', 'trains', 'conflicts', 'predictions', 'congestion', 'demand', 'optimization', 'scenarios', 'models', 'reports'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+                const nav = document.getElementById(`nav-${v}`);
+                if (nav) {
+                    nav.classList.remove('bg-cyan-500/10', 'border', 'border-cyan-500/30', 'text-white');
+                    nav.classList.add('text-slate-300');
+                }
+            });
+
+            const activeEl = document.getElementById(`view-${tab}`);
+            if (activeEl) activeEl.classList.remove('hidden');
+
+            const activeNav = document.getElementById(`nav-${tab}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-cyan-500/10', 'border', 'border-cyan-500/30', 'text-white');
+                activeNav.classList.remove('text-slate-300');
+            }
+
+            if (tab === 'map') {
+                setTimeout(() => {
+                    initFullMap();
+                }, 100);
+            } else if (tab === 'trains') {
+                fetchTrains();
+            } else if (tab === 'conflicts') {
+                fetchConflicts();
+            } else if (tab === 'models') {
+                fetchModels();
+            }
+        }
+
+        // Simulation Controls
+        async function controlSim(action) {
+            try {
+                const res = await fetch('/simulation/control', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ action: action })
+                });
+                const status = await res.json();
+                handleLiveUpdate({ simulation: status });
+            } catch (err) {
+                console.error("Simulation control error", err);
+            }
+        }
+
+        async function setSimAccel(val) {
+            try {
+                await fetch('/simulation/control', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ action: 'accelerate', acceleration_factor: parseFloat(val) })
+                });
+            } catch (err) {
+                console.error("Acceleration error", err);
+            }
+        }
+
+        // Fleet Table
+        async function fetchTrains() {
+            try {
+                const res = await fetch('/trains');
+                const trains = await res.json();
+                const tbody = document.getElementById('trains-table-body');
+                if (!tbody) return;
+
+                tbody.innerHTML = trains.map(t => `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="py-3 px-4 font-mono font-bold text-cyan-400">${t.train_number}</td>
+                        <td class="py-3 px-4">
+                            <div class="font-semibold text-white">${t.name}</div>
+                            <div class="text-[10px] text-slate-400">${t.train_type} • ${t.length_m}m</div>
+                        </td>
+                        <td class="py-3 px-4 font-mono">${t.origin_station_id} → ${t.destination_station_id}</td>
+                        <td class="py-3 px-4 font-mono font-semibold text-white">${t.current_speed_kmh} km/h</td>
+                        <td class="py-3 px-4 font-mono ${t.current_delay_minutes > 3 ? 'text-rose-400' : 'text-emerald-400'} font-bold">${t.current_delay_minutes} min</td>
+                        <td class="py-3 px-4 font-mono">${t.priority}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${t.status === 'RUNNING' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${t.status}</span>
+                        </td>
+                        <td class="py-3 px-4 font-mono">${t.cumulative_energy_kwh}</td>
+                        <td class="py-3 px-4">
+                            <button onclick="openTrainActions('${t.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded text-xs font-mono">Manage</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Failed to load trains", err);
+            }
+        }
+
+        // Conflict Arbiter Resolution
+        async function resolveConflict(conflictId) {
+            try {
+                const res = await fetch(`/optimization/conflicts/${conflictId}/resolve`, { method: 'POST' });
+                const data = await res.json();
+                alert(`Conflict Resolved via strategy: ${data.strategy}\n${data.rationale}`);
+                fetchConflicts();
+            } catch (err) {
+                console.error("Failed to resolve conflict", err);
+            }
+        }
+
+        async function fetchConflicts() {
+            try {
+                const res = await fetch('/conflicts');
+                const conflicts = await res.json();
+                updateConflictsUI(conflicts);
+            } catch (err) {
+                console.error("Failed to fetch conflicts", err);
+            }
+        }
+
+        // AI Delay Prediction Form
+        async function runDelayPrediction() {
+            const trainId = document.getElementById('pred-train-select').value;
+            const horizon = parseInt(document.getElementById('pred-horizon-select').value);
+
+            try {
+                const res = await fetch('/ai/delay', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ train_id: trainId, horizon_minutes: horizon })
+                });
+                const data = await res.json();
+
+                document.getElementById('delay-prediction-results').classList.remove('hidden');
+                document.getElementById('pred-res-delay').innerText = data.predicted_delay_minutes + ' min';
+                document.getElementById('pred-res-current').innerText = data.current_delay_minutes + ' min';
+                document.getElementById('pred-res-conf').innerText = Math.round(data.confidence * 100) + '%';
+                document.getElementById('pred-res-risk').innerText = data.risk_level;
+                document.getElementById('pred-res-version').innerText = data.model_version;
+
+                const factorsEl = document.getElementById('pred-factors-list');
+                factorsEl.innerHTML = data.contributing_factors.map(f => `
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-300 font-mono">${f.factor.replace(/_/g, ' ')}</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-28 bg-slate-800 rounded-full h-1.5">
+                                <div class="bg-cyan-400 h-1.5 rounded-full" style="width: ${Math.round(f.importance * 100)}%"></div>
+                            </div>
+                            <span class="text-slate-400 font-mono text-[10px]">${(f.importance * 100).toFixed(1)}%</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('pred-narrative').innerText = data.explanation;
+            } catch (err) {
+                console.error("Delay prediction failed", err);
+            }
+        }
+
+        // Route Optimization
+        async function runRouteOptimization() {
+            const origin = document.getElementById('opt-origin-select').value;
+            const dest = document.getElementById('opt-dest-select').value;
+            const alg = document.getElementById('opt-alg-select').value;
+
+            try {
+                const res = await fetch('/optimization/route', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        origin_station_id: origin,
+                        destination_station_id: dest,
+                        algorithm: alg,
+                        train_id: "SERVICE_OPT"
+                    })
+                });
+                const data = await res.json();
+                const opt = data.optimal_route;
+
+                document.getElementById('opt-results-container').classList.remove('hidden');
+                document.getElementById('opt-dist-val').innerText = opt.total_distance_km + ' km';
+                document.getElementById('opt-time-val').innerText = opt.estimated_travel_time_min + ' min';
+                document.getElementById('opt-energy-val').innerText = opt.estimated_energy_kwh + ' kWh';
+                document.getElementById('opt-exec-val').innerText = data.execution_time_ms + ' ms';
+                document.getElementById('opt-path-nodes').innerText = opt.path_nodes.join(' → ');
+                document.getElementById('opt-explanation').innerText = data.explanation;
+            } catch (err) {
+                console.error("Optimization failed", err);
+            }
+        }
+
+        // Scenario Benchmark
+        async function runScenarioBenchmark(scenarioId) {
+            try {
+                const res = await fetch(`/simulation/scenarios/${scenarioId}/compare`, { method: 'POST' });
+                const data = await res.json();
+
+                document.getElementById('scenario-benchmark-results').classList.remove('hidden');
+                document.getElementById('scen-title').innerText = `What-If Analysis: ${data.scenario_name}`;
+                document.getElementById('scen-delay-pct').innerText = data.delay_reduction_percentage + '%';
+                document.getElementById('scen-base-delay').innerText = data.baseline.total_delay_minutes + 'm';
+                document.getElementById('scen-opt-delay').innerText = data.optimized.total_delay_minutes + 'm';
+                document.getElementById('scen-conf-pct').innerText = data.conflicts_avoided_percentage + '%';
+                document.getElementById('scen-base-conf').innerText = data.baseline.conflicts_count;
+                document.getElementById('scen-opt-conf').innerText = data.optimized.conflicts_count;
+                document.getElementById('scen-pax-hrs').innerText = '1,048 hrs';
+            } catch (err) {
+                console.error("Scenario benchmark failed", err);
+            }
+        }
+
+        // Model Registry
+        async function fetchModels() {
+            try {
+                const res = await fetch('/models');
+                const models = await res.json();
+                const cont = document.getElementById('models-container');
+                if (!cont) return;
+
+                cont.innerHTML = models.map(m => `
+                    <div class="glass-card p-4 rounded-xl border border-slate-700/80">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-mono text-xs text-cyan-400 font-bold">${m.id}</span>
+                            <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-mono text-[10px]">${m.status}</span>
+                        </div>
+                        <h4 class="font-heading font-bold text-white text-sm mb-1">${m.name}</h4>
+                        <div class="text-xs text-slate-400 font-mono mb-3">Algorithm: ${m.algorithm} • v${m.version}</div>
+                        <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 text-xs font-mono space-y-1">
+                            ${Object.entries(m.metrics).map(([k, v]) => `
+                                <div class="flex justify-between"><span class="text-slate-400">${k}:</span><span class="text-cyan-300 font-bold">${v}</span></div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Failed to load models", err);
+            }
+        }
+
+        // Report Downloads
+        function downloadReport(type, format) {
+            window.open(`/reports/${type}?format=${format}`, '_blank');
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            initWebSocket();
+        });
+    </script>
+</body>
+</html>
