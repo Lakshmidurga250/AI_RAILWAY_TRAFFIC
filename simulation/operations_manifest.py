@@ -74,3 +74,6 @@
 # Feature PR #77: Model Secunderabad junction 10-track bypass layout (Module: feat/station-secunderabad-sc-hub)
 # Feature PR #78: Model Vijayawada Krishna river bridge bottlenecks (Module: feat/station-vijayawada-bypass-junction)
 # Feature PR #66: Add root poetry.lock backend specification (feat/lockfile-poetry-python-freeze)
+# Feature PR #81: Model Prayagraj junction sangam multi-directional routes (Module: feat/station-prayagraj-junction-crossover)
+# Feature PR #69: Map Howrah-Chennai coastal trunk route (feat/corridor-golden-quadrilateral-howrah-chennai)
+# Feature PR #82: Model Rani Kamlapati world-class station facilities (Module: feat/station-bhopal-habibganj-modernization)
