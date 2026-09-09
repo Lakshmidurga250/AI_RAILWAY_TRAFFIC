@@ -46,3 +46,13 @@ def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
         return payload
     except JWTError:
         return None
+
+def create_refresh_token_value() -> str:
+    """Generate cryptographically secure random refresh token string."""
+    import secrets
+    return secrets.token_urlsafe(48)
+
+def hash_token_value(raw_token: str) -> str:
+    """Hash token using SHA-256 for secure database storage."""
+    return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+

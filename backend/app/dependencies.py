@@ -44,12 +44,39 @@ def require_auth(current_user: Optional[User] = Depends(get_current_user)) -> Us
     return current_user
 
 def require_role(allowed_roles: list[str]):
-    """Role-based authorization dependency."""
+    """Role-based authorization dependency checking single or normalized roles."""
     def role_checker(user: User = Depends(require_auth)) -> User:
-        if user.role not in allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Operation not permitted. Required role: {allowed_roles}"
-            )
-        return user
+        if user.role in allowed_roles:
+            return user
+        # Also check multi-role association
+        user_role_names = [r.name for r in user.roles]
+        if any(r in allowed_roles for r in user_role_names):
+            return user
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Operation not permitted. Required role in: {allowed_roles}"
+        )
     return role_checker
+
+def require_permission(required_permission: str):
+    """Fine-grained RBAC permission dependency."""
+    def permission_checker(user: User = Depends(require_auth)) -> User:
+        if user.has_permission(required_permission):
+            return user
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Access denied: Missing required permission '{required_permission}'"
+        )
+    return permission_checker
+
+def require_any_permission(permissions: list[str]):
+    """Allow access if user holds at least one of the specified permissions."""
+    def multi_permission_checker(user: User = Depends(require_auth)) -> User:
+        if any(user.has_permission(p) for p in permissions):
+            return user
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Access denied: Requires at least one permission in {permissions}"
+        )
+    return multi_permission_checker
+

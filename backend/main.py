@@ -42,10 +42,16 @@ async def lifespan(app: FastAPI):
     # 1. Create database schema
     Base.metadata.create_all(bind=engine)
 
-    # 2. Seed initial admin user if absent
+    # 2. Seed default RBAC roles/permissions and initial admin user if absent
     db = SessionLocal()
     try:
-        admin_user = db.query(User).filter(User.username == "admin").first()
+        from backend.repositories.role_repository import RoleRepository
+        from backend.repositories.user_repository import UserRepository
+        role_repo = RoleRepository(db)
+        user_repo = UserRepository(db)
+        role_repo.seed_defaults()
+
+        admin_user = user_repo.get_by_username("admin")
         if not admin_user:
             admin_user = User(
                 username="admin",
@@ -55,9 +61,15 @@ async def lifespan(app: FastAPI):
                 role="admin",
                 is_active=True
             )
-            db.add(admin_user)
-            db.commit()
+            admin_user = user_repo.create(admin_user)
+            admin_role = role_repo.get_by_name("admin")
+            if admin_role:
+                user_repo.assign_role_to_user(admin_user.id, admin_role.id)
             print("[INFO] Seeded default administrator user: 'admin'")
+        else:
+            admin_role = role_repo.get_by_name("admin")
+            if admin_role:
+                user_repo.assign_role_to_user(admin_user.id, admin_role.id)
     finally:
         db.close()
 
@@ -100,17 +112,28 @@ class SecurityAndMetricsMiddleware:
             return
 
         import time
+        import uuid
         start_time = time.time()
+
+        # Extract or generate Request ID
+        req_id = None
+        for name, val in scope.get("headers", []):
+            if name.lower() == b"x-request-id":
+                req_id = val.decode("utf-8", errors="ignore")
+                break
+        if not req_id:
+            req_id = str(uuid.uuid4())
 
         async def send_wrapper(message):
             if message["type"] == "http.response.start":
                 raw_headers = list(message.get("headers", []))
-                # Security Headers (Phase 29)
+                # Security & Tracing Headers
                 raw_headers.append((b"x-content-type-options", b"nosniff"))
                 raw_headers.append((b"x-frame-options", b"DENY"))
                 raw_headers.append((b"x-xss-protection", b"1; mode=block"))
                 raw_headers.append((b"strict-transport-security", b"max-age=31536000; includeSubDomains"))
                 raw_headers.append((b"referrer-policy", b"strict-origin-when-cross-origin"))
+                raw_headers.append((b"x-request-id", req_id.encode("utf-8")))
                 message["headers"] = raw_headers
 
                 duration = time.time() - start_time

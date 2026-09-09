@@ -17,8 +17,16 @@ def seed():
     db = SessionLocal()
 
     try:
-        # 1. Admin User
-        admin = db.query(User).filter(User.username == "admin").first()
+        # 1. Seed RBAC Roles and Permissions
+        from backend.repositories.role_repository import RoleRepository
+        from backend.repositories.user_repository import UserRepository
+        role_repo = RoleRepository(db)
+        user_repo = UserRepository(db)
+        role_repo.seed_defaults()
+        print("[+] Seeded default RBAC roles (admin, dispatcher, operator, viewer) and permissions matrix.")
+
+        # 2. Admin User
+        admin = user_repo.get_by_username("admin")
         if not admin:
             admin = User(
                 username="admin",
@@ -27,8 +35,15 @@ def seed():
                 full_name="Operations Commander",
                 role="admin"
             )
-            db.add(admin)
-            print("[+] Seeded admin user: 'admin' (password: 'AdminPass123!')")
+            admin = user_repo.create(admin)
+            admin_role = role_repo.get_by_name("admin")
+            if admin_role:
+                user_repo.assign_role_to_user(admin.id, admin_role.id)
+            print("[+] Seeded admin user: 'admin' (password: 'AdminPass123!') with admin role")
+        else:
+            admin_role = role_repo.get_by_name("admin")
+            if admin_role:
+                user_repo.assign_role_to_user(admin.id, admin_role.id)
 
         # 2. Network Stations & Tracks from corridor network
         net = create_corridor_network()
