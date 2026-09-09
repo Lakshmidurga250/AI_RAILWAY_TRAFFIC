@@ -94,19 +94,27 @@ if settings.ENABLE_METRICS:
     metrics_app = make_asgi_app()
     app.mount("/metrics", metrics_app)
 
-# Include All Routers
-app.include_router(auth_router)
-app.include_router(trains_router)
-app.include_router(stations_router)
-app.include_router(network_router)
-app.include_router(simulation_router)
-app.include_router(ai_router)
-app.include_router(optimization_router)
-app.include_router(conflicts_router)
-app.include_router(analytics_router)
-app.include_router(reports_router)
-app.include_router(models_router)
+# Include All Routers (both root and /api prefixed for convenience)
+api_routers = [
+    auth_router,
+    trains_router,
+    stations_router,
+    network_router,
+    simulation_router,
+    ai_router,
+    optimization_router,
+    conflicts_router,
+    analytics_router,
+    reports_router,
+    models_router,
+]
+
+for r in api_routers:
+    app.include_router(r)
+    app.include_router(r, prefix="/api")
+
 app.include_router(websockets_router)
+app.include_router(websockets_router, prefix="/api")
 
 # Mount Static Files and Root Dashboard
 if STATIC_DIR.exists():

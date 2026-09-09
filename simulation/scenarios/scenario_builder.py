@@ -96,6 +96,11 @@ class DisruptionScenario:
             "delay_reduction_percentage": round(delay_reduction_pct, 2),
             "conflicts_avoided_percentage": round(conflicts_avoided_pct, 2),
             "energy_savings_percentage": round(energy_savings_pct, 2),
+            "improvement_metrics": {
+                "delay_reduction_pct": round(delay_reduction_pct, 2),
+                "conflicts_avoided_pct": round(conflicts_avoided_pct, 2),
+                "energy_savings_pct": round(energy_savings_pct, 2)
+            },
             "baseline": self.baseline_results,
             "optimized": self.optimized_results
         }

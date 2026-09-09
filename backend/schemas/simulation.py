@@ -39,4 +39,7 @@ class ScenarioComparisonResponse(BaseModel):
     scenario_name: str
     baseline: Dict[str, Any]
     optimized: Dict[str, Any]
-    improvement_metrics: Dict[str, Any]
+    delay_reduction_percentage: Optional[float] = 0.0
+    conflicts_avoided_percentage: Optional[float] = 0.0
+    energy_savings_percentage: Optional[float] = 0.0
+    improvement_metrics: Optional[Dict[str, Any]] = None
