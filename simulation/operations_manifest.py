@@ -12,3 +12,4 @@
 # Feature PR #12: Map Dedicated Freight Corridor 100km/h container paths (Module: feat/timetabling-dfc-freight-heavy-haul)
 # Feature PR #13: Add Ro-Ro automobile transport train paths (Module: feat/timetabling-automobile-special)
 # Feature PR #14: Configure peak suburban commuter train headways (Module: feat/timetabling-suburban-rush-hour)
+# Feature PR #15: Implement SIL-4 Electronic Interlocking route locking (Module: feat/electronic-interlocking-routes)
