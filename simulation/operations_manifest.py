@@ -66,3 +66,6 @@
 # Feature PR #68: Map Delhi-Howrah high-density coal & passenger trunk (Module: feat/corridor-golden-quadrilateral-delhi-howrah)
 # Feature PR #56: Enhance SVG track schematic with dynamic switch states (feat/frontend-interactive-topology-svg)
 # Feature PR #59: Render station platform utilization color gradients (feat/frontend-station-congestion-heatmap)
+# Feature PR #72: Map Central-Eastern freight & express corridor (Module: feat/corridor-diagonal-mumbai-howrah)
+# Feature PR #73: Model New Delhi 16-platform interlocking yard complex (Module: feat/station-new-delhi-yard-complex)
+# Feature PR #61: Enable SQLite Write-Ahead Logging for high throughput (feat/database-sqlite-wal-optimization)
