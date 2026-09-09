@@ -48,3 +48,4 @@
 # Feature PR #48: Implement cyber-dark glassmorphism auth modal and RBAC (Module: feat/auth-cyber-dark-glassmorphism)
 # Feature PR #49: Add top-bar dispatcher profile badge and logout flow (Module: feat/auth-topbar-profile-actions)
 # Feature PR #41: Generate UHF radio Movement Authority (MA) packets (feat/kavach-movement-authority-packets)
+# Feature PR #51: Export dispatch latency and conflict rate metrics (Module: feat/api-metrics-prometheus-observability)
