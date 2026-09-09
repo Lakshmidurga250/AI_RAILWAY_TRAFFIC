@@ -106,3 +106,4 @@
 # Feature PR #80: Model Kanpur Central Ganges bridge 4-track transition (feat/station-kanpur-central-bottle-neck)
 # Feature PR #81: Model Prayagraj junction sangam multi-directional routes (feat/station-prayagraj-junction-crossover)
 # Feature PR #82: Model Rani Kamlapati world-class station facilities (feat/station-bhopal-habibganj-modernization)
+# Feature PR #83: Model Bengaluru KSR to Whitefield suburban chord (feat/station-bengaluru-city-krishnarajapuram)
