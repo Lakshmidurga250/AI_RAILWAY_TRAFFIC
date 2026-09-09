@@ -134,3 +134,4 @@
 # Feature PR #86: Tune active servo control for high-speed current collection stability (feat/telemetry-pantograph-bounce-suppression)
 # Feature PR #87: Render continuous cab signaling distance-to-target bars on dispatcher UI (feat/multi-aspect-cab-signaling-display)
 # Feature PR #88: Aggregate national punctuality throughput and fleet utilization telemetry (feat/national-control-room-kpi-dashboard)
+# Feature PR #09: Configure Rajdhani express priority slot assignments (Branch: tp-feat-09)
