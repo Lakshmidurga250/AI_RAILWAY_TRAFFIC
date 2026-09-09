@@ -65,3 +65,4 @@
 # Feature PR #54: Train PPO policy for automated loop line dispatching (feat/ai-reinforcement-learning-dispatcher)
 # Feature PR #68: Map Delhi-Howrah high-density coal & passenger trunk (Module: feat/corridor-golden-quadrilateral-delhi-howrah)
 # Feature PR #56: Enhance SVG track schematic with dynamic switch states (feat/frontend-interactive-topology-svg)
+# Feature PR #59: Render station platform utilization color gradients (feat/frontend-station-congestion-heatmap)
