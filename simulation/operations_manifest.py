@@ -129,3 +129,4 @@
 # Feature PR #81: Implement dual-operator cooperative reset protocol for digital axle counters (feat/axle-counter-reset-interlocking)
 # Feature PR #82: Calculate regenerative braking energy recovery metrics for WAP-7 locomotives (feat/dynamic-braking-energy-regeneration)
 # Feature PR #83: Optimize passenger boarding and alighting dwell curves across suburban hubs (feat/suburban-rake-dwell-time-optimization)
+# Feature PR #84: Monitor northern division winter overhead line icing diagnostics (feat/catenary-ice-formation-sensor-alerts)
