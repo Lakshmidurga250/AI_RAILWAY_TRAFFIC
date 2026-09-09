@@ -8,3 +8,4 @@
 # Feature PR #08: Add 160 km/h Vande Bharat timetable schedules (Module: feat/timetabling-vande-bharat-express)
 # Feature PR #09: Configure Rajdhani express priority slot assignments (Module: feat/timetabling-rajdhani-premium)
 # Feature PR #10: Integrate Shatabdi daytime express high-frequency slots (Module: feat/timetabling-shatabdi-intercity)
+# Feature PR #11: Schedule Duronto point-to-point nonstop paths (Module: feat/timetabling-duronto-nonstop)
