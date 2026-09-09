@@ -65,6 +65,7 @@
 # Feature PR #54: Train PPO policy for automated loop line dispatching (feat/ai-reinforcement-learning-dispatcher)
 # Feature PR #68: Map Delhi-Howrah high-density coal & passenger trunk (Module: feat/corridor-golden-quadrilateral-delhi-howrah)
 # Feature PR #56: Enhance SVG track schematic with dynamic switch states (feat/frontend-interactive-topology-svg)
+<<<<<<< HEAD
 # Feature PR #59: Render station platform utilization color gradients (feat/frontend-station-congestion-heatmap)
 # Feature PR #74: Model Howrah 23-platform dual-system terminal complex (Module: feat/station-howrah-terminal-complex)
 # Feature PR #62: Seed default roles, permissions, and operator credentials (feat/database-rbac-security-seed)
@@ -77,3 +78,9 @@
 # Feature PR #81: Model Prayagraj junction sangam multi-directional routes (Module: feat/station-prayagraj-junction-crossover)
 # Feature PR #69: Map Howrah-Chennai coastal trunk route (feat/corridor-golden-quadrilateral-howrah-chennai)
 # Feature PR #82: Model Rani Kamlapati world-class station facilities (Module: feat/station-bhopal-habibganj-modernization)
+=======
+# Feature PR #57: Smooth train marker CSS transitions on real coordinates (feat/frontend-train-marker-kinematics)
+# Feature PR #69: Map Howrah-Chennai coastal trunk route (Module: feat/corridor-golden-quadrilateral-howrah-chennai)
+>>>>>>> feat/corridor-golden-quadrilateral-mumbai-chennai
+# Feature PR #84: Model Pune-Lonavala 3-track ghat climbing coordinates (Module: feat/station-pune-lonavala-ghat-banking)
+# Feature PR #71: Map Grand Trunk North-South passenger trunk (feat/corridor-diagonal-delhi-chennai)
