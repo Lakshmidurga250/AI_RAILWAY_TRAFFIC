@@ -55,3 +55,5 @@
 # Feature PR #59: Render station platform utilization color gradients (Module: feat/frontend-station-congestion-heatmap)
 # Feature PR #60: Display real-time emergency broadcast banner (Module: feat/frontend-incident-alert-banner)
 # Feature PR #49: Add top-bar dispatcher profile badge and logout flow (feat/auth-topbar-profile-actions)
+# Feature PR #51: Export dispatch latency and conflict rate metrics (feat/api-metrics-prometheus-observability)
+# Feature PR #63: Enforce 24-hour cryptographic JWT session validity (Module: feat/security-token-jwt-expiration)
