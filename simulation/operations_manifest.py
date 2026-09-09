@@ -52,3 +52,6 @@
 # Feature PR #52: Train multi-factor track conflict prediction network (Module: feat/ai-conflict-prediction-classifier)
 # Feature PR #43: Compute continuous distance-to-collision curves (feat/kavach-head-on-collision-prevention)
 # Feature PR #47: Offload live websocket snapshot serialization to threads (feat/websocket-telemetry-thread-offload)
+# Feature PR #59: Render station platform utilization color gradients (Module: feat/frontend-station-congestion-heatmap)
+# Feature PR #60: Display real-time emergency broadcast banner (Module: feat/frontend-incident-alert-banner)
+# Feature PR #49: Add top-bar dispatcher profile badge and logout flow (feat/auth-topbar-profile-actions)
