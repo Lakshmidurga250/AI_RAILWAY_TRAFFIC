@@ -37,3 +37,4 @@
 # Feature PR #37: Implement audio-frequency track circuit bypass rules (Module: feat/contingency-track-circuit-chatter)
 # Feature PR #38: Add train parting and tail lamp detection protocol (Module: feat/contingency-loco-flashing-tail-lamp)
 # Feature PR #39: Configure waterlogging speed restriction SOP (Module: feat/contingency-heavy-rainfall-submergence)
+# Feature PR #40: Deploy SIL-4 Kavach trackside RFID tag coordinates (Module: feat/kavach-sil4-rfid-waypoint-tags)
