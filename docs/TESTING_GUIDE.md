@@ -6,7 +6,7 @@ The project enforces strict quality standards through a comprehensive multi-tier
 
 ## 1. Test Suite Architecture
 
-The repository contains **14 automated test suites** in `tests/`, covering all system layers:
+The repository contains **18 automated test files** in `tests/`, covering all system layers:
 
 | Test Suite | File | Tests | Focus Area |
 |---|---|:---:|---|

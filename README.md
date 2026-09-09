@@ -149,7 +149,7 @@ Starts Backend (`:8000`), Frontend (`:3000`), Simulation Worker, PostgreSQL (`:5
 ```bash
 python -m pytest -v
 ```
-All **62 automated tests** run and pass across all 14 test suites in under 6 seconds.
+All **62 automated tests** run and pass across all 18 test files in under 6 seconds.
 
 ---
 
