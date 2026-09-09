@@ -91,3 +91,19 @@ For high-throughput continuous simulations without web server overhead, the head
 # Run headless simulation worker
 python -m simulation.engine.worker --interval 1.0 --acceleration 5.0
 ```
+
+---
+
+## 7. Multi-Physics & Rolling Stock Dynamics (`simulation/physics/`)
+
+- **Polach Wheel-Rail Adhesion & WSP (`wheel_rail_adhesion.py`)**:
+  - Models nonlinear contact creepage and friction saturation across dry, damp, wet, leaves-on-line, and icy railhead conditions.
+  - Simulates automated Wheel Slip Protection (WSP) and sanding system intervention to prevent macro-spin.
+- **Continuous Brake Pipe Acoustic Propagation (`brake_pneumatics.py`)**:
+  - Simulates the $260\text{ m/s}$ acoustic pressure wave propagating down UIC automatic air brake pipes.
+  - Evaluates progressive wagon cylinder pressure fill dynamics and in-train longitudinal coupler buff/draft forces to guarantee derailment safety (<1400 kN).
+- **25kV AC Catenary Electrical Power Flow (`catenary_power_flow.py`)**:
+  - Calculates line impedance, substation feeding sections, pantograph voltage sag under multi-train acceleration, and regenerative braking receptivity.
+- **Rolling Stock Consist Formations (`rolling_stock_consist.py`)**:
+  - Vehicle-by-vehicle compositions (High-Speed HST, Intercity EMU, Heavy Haul Mineral Freight) with calibrated Davis aerodynamic resistance equations.
+

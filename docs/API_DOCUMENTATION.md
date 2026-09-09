@@ -120,6 +120,20 @@ curl -X POST http://localhost:8000/simulation/scenarios \
 | `POST` | `/optimization/platforms`| Solves platform allocation to eliminate dwell conflicts |
 | `POST` | `/optimization/reschedule`| Solves dynamic rescheduling under active disruptions |
 | `POST` | `/optimization/eco-driving`| Generates energy-efficient coasting & regenerative speed profile |
+| `POST` | `/optimization/rl/train` | Triggers background DQN/PPO training loop with safety metrics |
+| `POST` | `/optimization/rl/dispatch` | Evaluates and dispatches an RL action protected by Safety Shield |
+| `GET`  | `/optimization/rl/runs` | Queries historical RL training runs and convergence curves |
+
+---
+
+## 8. Multi-Physics & Rolling Stock Dynamics (`/physics`)
+
+| Method | Path | Description |
+|---|---|---|
+| `GET`  | `/physics/consists` | Catalogs industrial train consists (HST, EMU, Heavy Haul Freight) |
+| `POST` | `/physics/simulate-adhesion` | Solves Polach wheel-rail contact mechanics, adhesion envelope, and WSP |
+| `POST` | `/physics/simulate-braking` | Simulates UIC brake pipe acoustic wave propagation and in-train coupler forces |
+| `POST` | `/physics/simulate-catenary`| Solves 25kV AC catenary power flow, pantograph voltage drops, and regenerative receptivity |
 
 ---
 
