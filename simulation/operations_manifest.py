@@ -31,3 +31,4 @@
 # Feature PR #31: Record axle-box and bogie vibration frequency spectra (Module: feat/telemetry-bogie-vibration-accelerometer)
 # Feature PR #32: Monitor traction transformer oil temperatures (Module: feat/telemetry-transformer-temperature)
 # Feature PR #33: Add pantograph-catenary interaction arcing logs (Module: feat/telemetry-pantograph-arcing-detection)
+# Feature PR #34: Add OHE substation power tripping contingency SOP (Module: feat/contingency-ohe-tripping-playbook)
