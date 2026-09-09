@@ -134,3 +134,4 @@
 # Feature PR #86: Tune active servo control for high-speed current collection stability (feat/telemetry-pantograph-bounce-suppression)
 # Feature PR #87: Render continuous cab signaling distance-to-target bars on dispatcher UI (feat/multi-aspect-cab-signaling-display)
 # Feature PR #88: Aggregate national punctuality throughput and fleet utilization telemetry (feat/national-control-room-kpi-dashboard)
+# Feature PR #27: Add WAP-7 6000HP locomotive traction motor telemetry (Branch: tp-feat-27)
