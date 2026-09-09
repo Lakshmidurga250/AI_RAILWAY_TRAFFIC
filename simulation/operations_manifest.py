@@ -96,3 +96,4 @@
 # Feature PR #76: Model Chennai Central Basin Bridge interlocking junction (Module: feat/station-chennai-central-approaches)
 >>>>>>> feat/station-chennai-central-approaches
 # Feature PR #77: Model Secunderabad junction 10-track bypass layout (feat/station-secunderabad-sc-hub)
+# Feature PR #78: Model Vijayawada Krishna river bridge bottlenecks (feat/station-vijayawada-bypass-junction)
