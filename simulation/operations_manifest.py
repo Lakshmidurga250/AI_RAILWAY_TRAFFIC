@@ -121,3 +121,4 @@
 # Feature PR #86: Model high-speed pantograph vibration envelope (feat/telemetry-pantograph-catenary-dynamics)
 # Feature PR #87: Implement high-priority Vande Bharat overtaking algorithms (feat/dispatch-priority-queue-preemption)
 # Feature PR #88: Calculate curve cant deficiency and centrifugal speed ceilings (feat/track-cant-deficiency-kinematics)
+# Feature PR #89: Deploy 2-out-of-3 hardware fail-safe logic comparator (feat/safety-sil4-voting-architecture)
