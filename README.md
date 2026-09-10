@@ -3,8 +3,8 @@
 [![CI Pipeline](https://github.com/railway-ai/traffic-optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/railway-ai/traffic-optimization)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%20%7C%203.14-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com)
-[![Tests Passing](https://img.shields.io/badge/tests-62%20passed-brightgreen.svg)]()
-[![License](https://img.shields.io/badge/license-MIT-green.svg)]()
+[![Tests Passing](https://img.shields.io/badge/tests-125%20passed-brightgreen.svg)]()
+[![License](https://img.shields.io/badge/license-Proprietary-blue.svg)]()
 
 > A production-grade railway simulation, prediction, optimization, and decision-support platform featuring discrete-event digital twin modeling, multi-horizon machine learning, explainable AI, reinforcement learning dispatching, pure ASGI security, Prometheus observability, and a cyber-dark operations control center.
 
