@@ -1,5 +1,5 @@
 """Simulation Control Service."""
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from simulation.engine.simulator import sim_engine
 from simulation.scenarios.scenario_builder import ScenarioCatalog, DisruptionScenario
 
