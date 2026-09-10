@@ -14,7 +14,8 @@ import { OptimizationPage }  from './pages/OptimizationPage';
 import { DigitalTwinPage }   from './pages/DigitalTwinPage';
 import { InterlockingPage }  from './pages/InterlockingPage';
 import { AnalyticsPage }     from './pages/AnalyticsPage';
-import { SettingsPage }      from './pages/SettingsPage';
+import { SettingsPage }        from './pages/SettingsPage';
+import { NationalControlPage } from './pages/NationalControlPage';
 import { LoginPage }         from './pages/LoginPage';
 import { AlertsPanel }       from './components/AlertsPanel';
 import { TopBar }            from './components/TopBar';
@@ -24,7 +25,7 @@ import { Sidebar }           from './components/Sidebar';
 export type PageId =
   | 'dashboard' | 'fleet' | 'network' | 'conflicts'
   | 'timetable' | 'ai' | 'simulation' | 'optimization'
-  | 'twin' | 'interlocking' | 'analytics' | 'settings';
+  | 'twin' | 'interlocking' | 'analytics' | 'settings' | 'national';
 
 export interface AppState {
   trains: Train[];
@@ -142,6 +143,7 @@ export function App() {
       case 'interlocking':  return <InterlockingPage />;
       case 'analytics':     return <AnalyticsPage state={state} />;
       case 'settings':      return <SettingsPage />;
+      case 'national':      return <NationalControlPage />;
       default:              return <DashboardPage {...commonProps} />;
     }
   };

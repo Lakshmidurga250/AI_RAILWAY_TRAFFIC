@@ -13,6 +13,7 @@ from backend.api.models import router as models_router
 from backend.api.websockets import router as websockets_router
 from backend.api.physics import router as physics_router
 from backend.api.emergency import router as emergency_router
+from backend.api.national import router as national_router
 
 __all__ = [
     "auth_router",
@@ -28,5 +29,6 @@ __all__ = [
     "models_router",
     "websockets_router",
     "physics_router",
-    "emergency_router"
+    "emergency_router",
+    "national_router",
 ]

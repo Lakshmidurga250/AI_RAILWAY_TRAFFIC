@@ -29,6 +29,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'optimization', icon: '🧬', label: 'Optimization', group: 'AI Modules' },
   { id: 'ai', icon: '🤖', label: 'AI Insights', group: 'AI Modules' },
   { id: 'twin', icon: '🌐', label: 'Digital Twin', group: 'AI Modules' },
+  { id: 'national', icon: '🛰️', label: 'National Control', group: 'National Ops' },
   { id: 'settings', icon: '⚙️', label: 'Settings', group: 'System' },
 ];
 
